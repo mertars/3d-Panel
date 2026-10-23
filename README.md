@@ -42,15 +42,8 @@ node scripts/e2e-check.mjs   # ekran görüntüleri: scripts/out/
 (`not_found_handling: single-page-application`) açar. Worker adı (`name`) panelde oluşturulan
 Worker adıyla aynı olmalı; farklıysa `wrangler.jsonc` içindeki `name` alanını değiştir.
 
-### Pages (klasik)
-
-| Ayar | Değer |
-|---|---|
-| Build komutu | `npm run build` |
-| Build çıktı klasörü | `dist` |
-
-Pages'te SPA yönlendirmesi `public/_redirects` ile yapılır (`/* /index.html 200`).
-Bu dosya Workers yüklemesinden `public/.assetsignore` ile hariç tutulur (Workers'ta aynı kural döngü hatası verir).
+SPA yönlendirmesi yalnızca `wrangler.jsonc` ile yapılır; repoda `_redirects` dosyası **olmamalı**
+(Workers, `/* /index.html 200` kuralını "sonsuz döngü" hatasıyla reddeder).
 
 ## Yapı
 
