@@ -162,3 +162,16 @@ export function parseGram(input: string): number | null {
       return value
   }
 }
+
+const TR_ASCII: Record<string, string> = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u', Ç: 'C', Ğ: 'G', İ: 'I', Ö: 'O', Ş: 'S', Ü: 'U' }
+
+/** Dosya adı için güvenli ASCII: Türkçe harfler sadeleşir, diğerleri "-" olur */
+export function fileSlug(input: string): string {
+  return input
+    .replace(/[çğıöşüÇĞİÖŞÜ]/g, (c) => TR_ASCII[c] ?? c)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Za-z0-9_-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}

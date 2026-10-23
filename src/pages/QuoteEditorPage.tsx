@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { toPng } from 'html-to-image'
+import { toBlob } from 'html-to-image'
 import { ArrowLeft, Check, ClipboardCopy, Download, FileText, PackagePlus, Plus, Printer, ShoppingBag, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -10,7 +10,7 @@ import { useCatalog } from '@/features/calculator/useCalculation'
 import { evaluateVariant } from '@/features/products/evaluate'
 import { customItem, quoteItemFor, quoteText, quoteTotal, STATUS_LABEL, withQuantity } from '@/features/quotes/actions'
 import { QuoteCard } from '@/features/quotes/QuoteCard'
-import { formatTL } from '@/lib/format'
+import { fileSlug, formatTL } from '@/lib/format'
 import { useSettings } from '@/store/settings'
 import { toast } from '@/store/toast'
 
@@ -125,11 +125,17 @@ export default function QuoteEditorPage() {
   async function downloadPng() {
     if (!cardRef.current) return
     try {
-      const url = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true, backgroundColor: '#ffffff' })
+      const blob = await toBlob(cardRef.current, { pixelRatio: 2, cacheBust: true, backgroundColor: '#ffffff' })
+      if (!blob) throw new Error('boş görsel')
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${q.number}${q.customer ? '-' + q.customer.trim().replace(/\s+/g, '-') : ''}.png`
+      a.download = `${fileSlug([q.number, q.customer].filter(Boolean).join('-')) || 'teklif'}.png`
+      // Belgeye eklenmemiş bağlantıda bazı tarayıcılar dosya adını yok sayar
+      document.body.appendChild(a)
       a.click()
+      a.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
       toast('Teklif görseli indirildi', { tone: 'success' })
     } catch {
       toast('Görsel oluşturulamadı', { tone: 'danger' })
