@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { KatmanDB } from './db'
 
 /** Parça 1 (v1) verisiyle açılan veritabanı v2'ye eksiksiz taşınmalı */
-describe('Dexie v1 → v2 geçişi', () => {
+describe('Dexie v1 → güncel sürüm geçişi', () => {
   it('eski ürün, yazıcı, ayar ve teklif kayıtları tamamlanır', async () => {
     const name = 'katman-migration-test'
     const v1 = new Dexie(name)
@@ -26,7 +26,7 @@ describe('Dexie v1 → v2 geçişi', () => {
 
     const db = new KatmanDB(name)
     await db.open()
-    expect(db.verno).toBe(2)
+    expect(db.verno).toBe(3)
     const x = await db.products.get('x')
     expect(x).toMatchObject({ saleSource: 'manual', salePrice: 275, variants: [], license: 'unknown', archived: false, competitorPrice: null })
     expect(x?.printNotes).toMatchObject({ layerHeight: null, nozzle: '' })
@@ -36,6 +36,8 @@ describe('Dexie v1 → v2 geçişi', () => {
     expect(s).toMatchObject({ kwhPrice: 3.2, onboarded: true, lowStockGrams: 150, quoteValidityDays: 14 })
     expect(s?.bulkTiers).toHaveLength(5)
     expect(await db.quotes.count()).toBe(0) // şemaya uymayan yer tutucu teklif temizlendi
+    expect(s).toMatchObject({ consumeOn: 'printing', printerHoursPerDay: 16, lastBackupAt: null })
+    expect(await db.failures.count()).toBe(0)
     db.close()
   })
 })

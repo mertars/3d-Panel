@@ -1,12 +1,14 @@
-import type { Order, Printer } from '@/db'
+import type { Failure, Order, Printer } from '@/db'
 import { paybackRatio, printerHourlyDepreciation } from '@/lib/pricing'
 
 export interface PrinterUsage {
-  /** Tamamlanan siparişlerden gelen baskı saati */
+  /** Stoktan düşülmüş (Baskıda ve sonrası) siparişlerden gelen baskı saati */
   orderHours: number
-  /** Önceki kullanım + sipariş saatleri */
+  /** Başarısız baskı saati */
+  failureHours: number
+  /** Önceki kullanım + sipariş + fire saatleri */
   totalHours: number
-  /** Tamamlanan siparişlerdeki amortisman payı toplamı (TL) */
+  /** Siparişlerdeki amortisman payı toplamı (TL) */
   collected: number
   /** collected / yazıcı fiyatı */
   payback: number
@@ -16,19 +18,28 @@ export interface PrinterUsage {
   hourlyDepreciation: number
 }
 
-/** Yazıcı istatistikleri — yalnızca "done" durumundaki siparişler sayılır */
-export function printerUsage(p: Printer, orders: Order[]): PrinterUsage {
-  const done = orders.filter((o) => o.status === 'done' && o.printerId === p.id)
-  const orderHours = done.reduce((s, o) => s + (o.printHours || 0), 0)
-  const collected = done.reduce((s, o) => s + (o.depreciation || 0), 0)
-  const totalHours = (p.startHours || 0) + orderHours
+/** Yazıcı istatistikleri — siparişlerin stok/saat kaydından (consumption) okunur */
+export function printerUsage(p: Printer, orders: Order[], failures: Failure[] = []): PrinterUsage {
+  let orderHours = 0
+  let collected = 0
+  let completedOrders = 0
+  for (const o of orders) {
+    const load = o.consumption?.printers.find((x) => x.printerId === p.id)
+    if (!load) continue
+    orderHours += load.hours
+    collected += load.depreciation
+    completedOrders++
+  }
+  const failureHours = failures.reduce((s, f) => s + (f.consumption?.printers.find((x) => x.printerId === p.id)?.hours ?? 0), 0)
+  const totalHours = (p.startHours || 0) + orderHours + failureHours
   return {
     orderHours,
+    failureHours,
     totalHours,
     collected,
     payback: paybackRatio(collected, p.price),
     lifeUsed: p.lifeHours > 0 ? totalHours / p.lifeHours : 0,
-    completedOrders: done.length,
+    completedOrders,
     hourlyDepreciation: printerHourlyDepreciation(p.price, p.salvageValue, p.lifeHours),
   }
 }
