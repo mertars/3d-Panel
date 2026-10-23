@@ -39,7 +39,7 @@ export function ProductThumb({ product, className }: { product: Product; classNa
 export function Swatches({ colors, size = 16 }: { colors: string[]; size?: number }) {
   if (!colors.length) return null
   return (
-    <span className="flex shrink-0 -space-x-1.5" aria-label={`${colors.length} renk`}>
+    <span className="flex shrink-0 -space-x-1.5" role="img" aria-label={`${colors.length} renk`}>
       {colors.map((c) => (
         <ColorSwatch key={c} color={c} size={size} className="text-fg-3" />
       ))}

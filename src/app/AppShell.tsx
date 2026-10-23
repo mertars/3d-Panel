@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { createContext, Suspense, useContext, useLayoutEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { Skeleton } from '@/components/ui'
@@ -73,7 +73,7 @@ export function AppShell() {
           )}
         >
           <div ref={mainRef} className="min-w-0">
-            <motion.div
+            <m.div
               key={pathname}
               initial={reduce ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -83,7 +83,7 @@ export function AppShell() {
               <Suspense fallback={<PageFallback />}>
                 <Outlet />
               </Suspense>
-            </motion.div>
+            </m.div>
           </div>
         </main>
       </div>

@@ -18,7 +18,8 @@
   --highlight: rgba(255, 255, 255, 0.09);
   --text: #f5f5f7;
   --text-2: #a1a1aa;
-  --text-3: #71717a;
+  /* Spesifikasyon #71717A önerdi; koyu zeminde küçük metinde WCAG AA (4,5:1) için açıldı */
+  --text-3: #8e8e99;
   --input: rgba(255, 255, 255, 0.04);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -12px rgba(0, 0, 0, 0.5);
   --blob-opacity: 0.2;
@@ -30,7 +31,7 @@
   --brand-2: #ff3d77;
   --success: #22c55e;
   --warning: #f59e0b;
-  --danger: #ef4444;
+  --danger: #f87171;
   --info: #38bdf8;
   /* Grafik kategorik paleti (doğrulandı: dataviz validator, koyu yüzey) */
   --series-1: #3987e5;
@@ -65,11 +66,11 @@
   --price-a-tint: rgba(255, 122, 24, 0.1);
   --price-b-tint: rgba(124, 92, 255, 0.1);
   /* Açık temada durum renkleri koyulaştırıldı: beyaz zeminde metin kontrastı ≥ 4,5:1 */
-  --brand-2: #d1225e;
-  --success: #15803d;
-  --warning: #b45309;
-  --danger: #c81e1e;
-  --info: #0369a1;
+  --brand-2: #b0154c;
+  --success: #166534;
+  --warning: #92400e;
+  --danger: #b91c1c;
+  --info: #075985;
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;

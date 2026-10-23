@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowRight, BarChart3, Calculator, ClipboardList, Disc3, Gauge, LayoutDashboard, Plus, Target, TriangleAlert, Wand2 } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Badge, Button, ColorSwatch, EmptyState, Field, GlassCard, Input, ProgressBar, Segmented, Skeleton, StatCard } from '@/components/ui'
 import { createOrder, listSpools } from '@/db'
@@ -18,7 +18,11 @@ import {
   topSellers,
   type RangeKey,
 } from '@/features/dashboard/analytics'
-import { BarList, ChannelDonut, MonthlyChart, SERIES } from '@/features/dashboard/Charts'
+import { BarList, SERIES } from '@/features/dashboard/BarList'
+
+// Grafik kütüphanesi (recharts) ayrı parça: kartlar ve listeler beklemeden çizilir
+const MonthlyChart = lazy(() => import('@/features/dashboard/Charts').then((m) => ({ default: m.MonthlyChart })))
+const ChannelDonut = lazy(() => import('@/features/dashboard/Charts').then((m) => ({ default: m.ChannelDonut })))
 import { STATUS_LABEL, STATUS_TONE, useOrdersData } from '@/features/orders/actions'
 import { DueBadge } from '@/features/orders/OrderCard'
 import { useEvaluatedProducts } from '@/features/products/useProducts'
@@ -207,10 +211,14 @@ export default function DashboardPage() {
 
       <div className="grid min-w-0 gap-4 @4xl:grid-cols-3">
         <Card title="Aylık ciro ve net kâr" icon={<BarChart3 />} className="@4xl:col-span-2">
-          <MonthlyChart data={data.months} />
+          <Suspense fallback={<Skeleton className="h-60 w-full" />}>
+            <MonthlyChart data={data.months} />
+          </Suspense>
         </Card>
         <Card title="Kanal dağılımı" icon={<Target />}>
-          <ChannelDonut data={data.shares} colorOf={colorOf} />
+          <Suspense fallback={<Skeleton className="mx-auto size-36 rounded-full" />}>
+            <ChannelDonut data={data.shares} colorOf={colorOf} />
+          </Suspense>
         </Card>
       </div>
 

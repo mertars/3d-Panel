@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { CheckCircle2, CircleAlert, Info, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { cn } from '@/lib/cn'
@@ -13,7 +13,7 @@ function ToastItem({ t }: { t: Toast }) {
 
   const Icon = t.tone === 'success' ? CheckCircle2 : t.tone === 'danger' ? CircleAlert : Info
   return (
-    <motion.div
+    <m.div
       layout
       initial={{ opacity: 0, y: 8, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -49,7 +49,7 @@ function ToastItem({ t }: { t: Toast }) {
       >
         <X className="size-4" />
       </button>
-    </motion.div>
+    </m.div>
   )
 }
 

@@ -46,17 +46,6 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router'],
-          charts: ['recharts'],
-          data: ['dexie', 'dexie-react-hooks', 'zustand', 'zod'],
-        },
-      },
-    },
-  },
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],

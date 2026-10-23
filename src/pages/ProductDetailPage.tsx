@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowLeft, ExternalLink, FileSignature, Package, Pencil } from 'lucide-react'
-import { useMemo } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useLayout } from '@/app/AppShell'
 import { useOpenProduct } from '@/app/useNewProduct'
@@ -11,7 +11,6 @@ import { ChannelPriceTable } from '@/features/channels/ChannelPriceTable'
 import { BulkPriceCard } from '@/features/products/detail/BulkPriceCard'
 import { CostBreakdownCard } from '@/features/products/detail/CostBreakdownCard'
 import { LicenseCompetitorCard } from '@/features/products/detail/LicenseCompetitorCard'
-import { PriceHistoryCard } from '@/features/products/detail/PriceHistoryCard'
 import { PrintNotesCard } from '@/features/products/detail/PrintNotesCard'
 import { SalePriceCard } from '@/features/products/detail/SalePriceCard'
 import { VariantsCard } from '@/features/products/detail/VariantsCard'
@@ -23,6 +22,8 @@ import { formatDate } from '@/lib/format'
 import { useSettings } from '@/store/settings'
 
 const TWO_COLUMN_MIN = 960
+
+const PriceHistoryCard = lazy(() => import('@/features/products/detail/PriceHistoryCard').then((m) => ({ default: m.PriceHistoryCard })))
 
 export default function ProductDetailPage() {
   const { id = '' } = useParams()
@@ -141,7 +142,9 @@ export default function ProductDetailPage() {
       <BulkPriceCard unitPrice={product.salePrice} unitCost={unitCost} />
       <LicenseCompetitorCard product={product} unitCost={unitCost} />
       <PrintNotesCard product={product} />
-      <PriceHistoryCard productId={product.id} />
+      <Suspense fallback={<Skeleton className="h-56 rounded-card" />}>
+        <PriceHistoryCard productId={product.id} />
+      </Suspense>
     </>
   )
 

@@ -1,4 +1,4 @@
-import { MotionConfig } from 'framer-motion'
+import { LazyMotion, MotionConfig } from 'framer-motion'
 import { lazy, useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Toaster, TooltipProvider } from '@/components/ui'
@@ -23,6 +23,8 @@ const OrdersPage = lazy(() => import('@/pages/OrdersPage'))
 const PriceListPage = lazy(() => import('@/pages/PriceListPage'))
 const OrderEditorPage = lazy(() => import('@/pages/OrderEditorPage'))
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
+
+const loadMotionFeatures = () => import('./motionFeatures').then((m) => m.default)
 
 const router = createBrowserRouter([
   {
@@ -71,6 +73,7 @@ export function App() {
   }, [settings, setWizardOpen])
 
   return (
+    <LazyMotion features={loadMotionFeatures} strict>
     <MotionConfig reducedMotion="user">
       <TooltipProvider delayDuration={300}>
         <Backdrop />
@@ -85,5 +88,6 @@ export function App() {
         <Toaster />
       </TooltipProvider>
     </MotionConfig>
+    </LazyMotion>
   )
 }
