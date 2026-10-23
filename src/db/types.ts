@@ -26,7 +26,7 @@ export interface AppSettings extends PricingSettings {
   updatedAt: number
 }
 
-export type PrinterPreset = 'a1mini' | 'a1' | 'p1s' | 'x1c' | 'h2d' | 'other'
+export type PrinterPreset = 'a1mini' | 'a1' | 'a2' | 'a2l' | 'p1s' | 'x1c' | 'h2d' | 'other'
 
 export interface Printer {
   id: ID
@@ -221,6 +221,8 @@ export interface QuoteItem {
   name: string
   quantity: number
   unitPrice: number
+  /** true ise birim fiyat elle girildi; adet değişince toplu indirim yeniden uygulanmaz */
+  priceLocked: boolean
 }
 
 export interface Quote {

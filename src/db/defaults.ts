@@ -61,6 +61,9 @@ export interface PrinterPresetInfo {
 export const PRINTER_PRESETS: PrinterPresetInfo[] = [
   { key: 'a1mini', name: 'Bambu Lab A1 mini', watts: 80, maintenancePerHour: 1 },
   { key: 'a1', name: 'Bambu Lab A1', watts: 100, maintenancePerHour: 1.25 },
+  // A2 / A2L: resmi ortalama tüketim yayınlanmadı (A2L etiketi maks. 1000 W) — A1 sınıfından tahmin
+  { key: 'a2', name: 'Bambu Lab A2', watts: 110, maintenancePerHour: 1.25 },
+  { key: 'a2l', name: 'Bambu Lab A2L', watts: 150, maintenancePerHour: 1.5 },
   { key: 'p1s', name: 'Bambu Lab P1S', watts: 120, maintenancePerHour: 1.5 },
   { key: 'x1c', name: 'Bambu Lab X1C', watts: 130, maintenancePerHour: 2 },
   { key: 'h2d', name: 'Bambu Lab H2D', watts: 200, maintenancePerHour: 3 },

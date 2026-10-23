@@ -342,3 +342,26 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 }
+
+/* ───────────── Yazdırma: yalnızca teklif kartı ───────────── */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .app-backdrop,
+  .no-print {
+    display: none !important;
+  }
+  .print-area {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .quote-card {
+    box-shadow: none !important;
+    border: 1px solid #e5e5ea;
+  }
+}

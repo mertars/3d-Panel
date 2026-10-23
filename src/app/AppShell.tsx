@@ -57,13 +57,15 @@ export function AppShell() {
       >
         İçeriğe geç
       </a>
-      <Sidebar />
-      <div className={cn('min-w-0 transition-[padding] duration-200', collapsed ? 'lg:pl-[72px]' : 'lg:pl-[248px]')}>
+      <div className="no-print">
+        <Sidebar />
+      </div>
+      <div className={cn('min-w-0 transition-[padding] duration-200 print:pl-0!', collapsed ? 'lg:pl-[72px]' : 'lg:pl-[248px]')}>
         <TopBar />
         <main
           id="main"
           className={cn(
-            'mx-auto w-full max-w-[1440px] min-w-0 px-4 pt-5 sm:px-6 lg:px-8 lg:pt-8 lg:pb-12',
+            'mx-auto w-full max-w-[1440px] min-w-0 px-4 pt-5 sm:px-6 lg:px-8 lg:pt-8 lg:pb-12 print:p-0!',
             // Mobilde alt sekme çubuğu + mini fiyat çubuğu için yer bırak
             'pb-[calc(152px+env(safe-area-inset-bottom))]',
           )}
@@ -83,7 +85,9 @@ export function AppShell() {
           </div>
         </main>
       </div>
-      <BottomTabs hidden={keyboardOpen} />
+      <div className="no-print">
+        <BottomTabs hidden={keyboardOpen} />
+      </div>
       <CommandPalette />
     </LayoutContext.Provider>
   )

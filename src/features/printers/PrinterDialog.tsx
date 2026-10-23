@@ -31,6 +31,7 @@ type FormState = {
   lifeHours: number | null
   watts: number | null
   maintenancePerHour: number | null
+  startHours: number | null
   isDefault: boolean
 }
 
@@ -45,6 +46,7 @@ function initial(p?: Printer | null): FormState {
     lifeHours: DEFAULT_PRINTER_LIFE_HOURS,
     watts: preset.watts,
     maintenancePerHour: preset.maintenancePerHour,
+    startHours: null,
     isDefault: false,
   }
 }
@@ -105,7 +107,7 @@ export function PrinterDialog({ open, onOpenChange, printer, onSaved }: PrinterD
       setErrors(Object.fromEntries(parsed.error.issues.map((i) => [String(i.path[0]), i.message])))
       return
     }
-    const saved = await savePrinter({ ...parsed.data, id: printer?.id, preset: f.preset, isDefault: f.isDefault })
+    const saved = await savePrinter({ ...parsed.data, id: printer?.id, preset: f.preset, isDefault: f.isDefault, startHours: f.startHours ?? 0 })
     toast(printer ? 'Yazıcı güncellendi' : 'Yazıcı eklendi', { tone: 'success' })
     onSaved?.(saved)
     onOpenChange(false)
@@ -165,6 +167,14 @@ export function PrinterDialog({ open, onOpenChange, printer, onSaved }: PrinterD
           info="Nozzle, PTFE tüp, plaka, yağ gibi sarf malzemelerinin saat başına düşen tahmini maliyeti."
         >
           <NumberInput id="pr-maint" value={f.maintenancePerHour} onChange={(v) => set({ maintenancePerHour: v })} unit="₺/sa" step={0.25} />
+        </Field>
+        <Field
+          label="Önceki kullanım"
+          htmlFor="pr-start"
+          className="sm:col-span-2"
+          info="Katman’ı kullanmaya başlamadan önce bu yazıcıyla basılmış yaklaşık saat (Bambu Handy / yazıcı ekranında görülebilir). Toplam saate eklenir."
+        >
+          <NumberInput id="pr-start" value={f.startHours} onChange={(v) => set({ startHours: v })} unit="saat" step={50} placeholder="0" />
         </Field>
         <div className="inset-surface flex items-center justify-between gap-3 rounded-ctl px-4 py-3 sm:col-span-2">
           <div className="min-w-0">

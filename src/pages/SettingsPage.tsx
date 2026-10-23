@@ -2,7 +2,7 @@ import { Database, RotateCcw, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Button, ConfirmDialog, Section } from '@/components/ui'
 import { resetAllData } from '@/db'
-import { ChannelsSettingsSection, FilamentTypesSettingsSection, PrintersSettingsSection } from '@/features/settings/CatalogSettings'
+import { BrandSection, BulkTiersSection, CatalogLinksSection, StockSection } from '@/features/settings/BusinessSettings'
 import { AppearanceSection, CostSettingsSection, PricingSettingsSection, TaxFormatSection } from '@/features/settings/GeneralSettings'
 import { useUI } from '@/store/ui'
 
@@ -44,9 +44,10 @@ export default function SettingsPage() {
       <PricingSettingsSection />
       <CostSettingsSection />
       <TaxFormatSection />
-      <PrintersSettingsSection />
-      <FilamentTypesSettingsSection />
-      <ChannelsSettingsSection />
+      <BulkTiersSection />
+      <StockSection />
+      <BrandSection />
+      <CatalogLinksSection />
       <AppearanceSection />
       <DataSection />
     </div>
