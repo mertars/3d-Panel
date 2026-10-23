@@ -3,6 +3,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "3d-panel",
   "compatibility_date": "2025-09-01",
+  // Panelde "Build command" boş kalsa bile deploy öncesi derlenir
+  "build": {
+    "command": "npm run build"
+  },
   "assets": {
     "directory": "./dist",
     // SPA: bilinmeyen yollar index.html'e düşer (/urunler, /ayarlar … yenilemede 404 olmasın)
