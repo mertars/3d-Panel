@@ -27,6 +27,11 @@
   --overlay: rgba(4, 4, 8, 0.6);
   --price-a-tint: rgba(255, 122, 24, 0.12);
   --price-b-tint: rgba(124, 92, 255, 0.14);
+  --brand-2: #ff3d77;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #38bdf8;
   /* Grafik kategorik paleti (doğrulandı: dataviz validator, koyu yüzey) */
   --series-1: #3987e5;
   --series-2: #d95926;
@@ -59,6 +64,12 @@
   --overlay: rgba(240, 240, 245, 0.6);
   --price-a-tint: rgba(255, 122, 24, 0.1);
   --price-b-tint: rgba(124, 92, 255, 0.1);
+  /* Açık temada durum renkleri koyulaştırıldı: beyaz zeminde metin kontrastı ≥ 4,5:1 */
+  --brand-2: #d1225e;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #c81e1e;
+  --info: #0369a1;
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
@@ -85,13 +96,13 @@
   --color-field: var(--input);
 
   --color-brand-1: #ff7a18;
-  --color-brand-2: #ff3d77;
+  --color-brand-2: var(--brand-2);
   --color-brand-3: #7c5cff;
   --color-blue: #38bdf8;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #38bdf8;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 
   --radius-card: 20px;
   --radius-ctl: 12px;

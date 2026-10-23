@@ -14,6 +14,7 @@ import {
   NumberInput,
   ProgressBar,
   Select,
+  Skeleton,
   StatCard,
   Textarea,
 } from '@/components/ui'
@@ -293,7 +294,14 @@ export function SpoolsSection() {
   const [editing, setEditing] = useState<Spool | null>(null)
   const [weighing, setWeighing] = useState<Spool | null>(null)
 
-  if (!spools) return null
+  if (!spools)
+    return (
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-56 rounded-card" />
+        ))}
+      </div>
+    )
   const add = () => {
     setEditing(null)
     setOpen(true)

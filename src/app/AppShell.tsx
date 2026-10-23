@@ -9,6 +9,7 @@ import { BottomTabs } from './BottomTabs'
 import { CommandPalette } from './CommandPalette'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { useShortcuts } from './useShortcuts'
 
 interface LayoutInfo {
   /** İçerik alanının genişliği (px) — sayfalar düzen kararını buna göre verir */
@@ -34,6 +35,7 @@ export function AppShell() {
   const collapsed = useUI((s) => s.sidebarCollapsed)
   const { pathname } = useLocation()
   const keyboardOpen = useKeyboardOpen()
+  useShortcuts()
   const reduce = useReducedMotion()
   const mainRef = useRef<HTMLDivElement>(null)
   const [layout, setLayout] = useState<Omit<LayoutInfo, 'keyboardOpen'>>({ contentWidth: 1200, bottomBar: false })

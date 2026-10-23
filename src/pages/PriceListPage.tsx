@@ -142,7 +142,7 @@ export default function PriceListPage() {
             {chosen.size}/{active.length} seçili
           </Badge>
         </div>
-        <Input leading={<Search />} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ürün ara" aria-label="Fiyat listesinde ürün ara" type="search" />
+        <Input leading={<Search />} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Ürün ara" aria-label="Fiyat listesinde ürün ara" type="search" data-page-search />
         <div className="mt-2 flex gap-2 text-xs">
           <button type="button" className="min-h-9 text-brand-2 hover:underline" onClick={() => setSelected(new Set(active.map((i) => i.product.id)))}>
             tümünü seç

@@ -163,6 +163,20 @@ export function CommandPalette() {
               </div>
             ))}
           </div>
+          <div className="hidden items-center gap-4 border-t border-line px-4 py-2.5 text-[11px] text-fg-3 sm:flex">
+            <span>
+              <kbd className="rounded border border-line px-1">N</kbd> yeni ürün
+            </span>
+            <span>
+              <kbd className="rounded border border-line px-1">/</kbd> sayfada ara
+            </span>
+            <span>
+              <kbd className="rounded border border-line px-1">⌘K</kbd> / <kbd className="rounded border border-line px-1">Ctrl K</kbd> palet
+            </span>
+            <span className="ml-auto">
+              <kbd className="rounded border border-line px-1">↑↓</kbd> gez · <kbd className="rounded border border-line px-1">↵</kbd> aç
+            </span>
+          </div>
         </RDialog.Content>
       </RDialog.Portal>
     </RDialog.Root>
