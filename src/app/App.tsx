@@ -3,13 +3,13 @@ import { lazy, useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Toaster, TooltipProvider } from '@/components/ui'
 import { useApplyTheme } from '@/hooks/useTheme'
-import { DashboardPage } from '@/pages/placeholders'
 import { useSettingsStore } from '@/store/settings'
 import { useUI } from '@/store/ui'
 import { LogoMark } from './Logo'
 import { AppShell } from './AppShell'
 import { Backdrop } from './Backdrop'
 
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const CalculatorPage = lazy(() => import('@/pages/CalculatorPage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const ProductsPage = lazy(() => import('@/pages/ProductsPage'))

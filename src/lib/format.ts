@@ -20,11 +20,19 @@ const nf2 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFr
 const nf0to2 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const nf1 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 1 })
 
-/** Gösterim için 2 haneye yuvarlanmış sayı (1.234,56) */
+const nfCache = new Map<number, Intl.NumberFormat>()
+
+/** Gösterim için en fazla `maxDigits` haneye yuvarlanmış sayı (1.234,56) */
 export function formatNumber(value: number, maxDigits = 2): string {
   if (!Number.isFinite(value)) return '—'
   if (maxDigits === 1) return nf1.format(value)
-  return nf0to2.format(value)
+  if (maxDigits === 2) return nf0to2.format(value)
+  let nf = nfCache.get(maxDigits)
+  if (!nf) {
+    nf = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: maxDigits })
+    nfCache.set(maxDigits, nf)
+  }
+  return nf.format(value)
 }
 
 /** 1.234,56 ₺ */

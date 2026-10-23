@@ -365,3 +365,8 @@ input[type='number']::-webkit-outer-spin-button {
     border: 1px solid #e5e5ea;
   }
 }
+
+/* Bağlantıyla kaydırılan bölümler yapışkan üst çubuğun altında kalmasın */
+.glass[id] {
+  scroll-margin-top: 96px;
+}

@@ -86,7 +86,7 @@ export function DataSection() {
   const stale = !lastBackup || Date.now() - lastBackup > 14 * 86400000
 
   return (
-    <Section title="Veri" description="Tüm veriler yalnızca bu cihazda (IndexedDB) saklanır — düzenli yedek al." icon={<Database className="size-4" />}>
+    <Section id="veri" title="Veri" description="Tüm veriler yalnızca bu cihazda (IndexedDB) saklanır — düzenli yedek al." icon={<Database className="size-4" />}>
       <p className={`mb-3 text-sm ${stale ? 'text-warning' : 'text-fg-2'}`}>
         {lastBackup ? `Son yedek: ${relativeDays(lastBackup)} (${formatDate(lastBackup)})` : 'Henüz yedek alınmadı'}
       </p>
