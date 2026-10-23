@@ -370,3 +370,20 @@ input[type='number']::-webkit-outer-spin-button {
 .glass[id] {
   scroll-margin-top: 96px;
 }
+
+@media print {
+  .pricelist-frame {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .pricelist-scale {
+    transform: none !important;
+    width: auto !important;
+  }
+  .pricelist-sheet {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+}

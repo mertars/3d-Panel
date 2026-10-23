@@ -20,6 +20,7 @@ const ChannelsPage = lazy(() => import('@/pages/ChannelsPage'))
 const QuotesPage = lazy(() => import('@/pages/QuotesPage'))
 const QuoteEditorPage = lazy(() => import('@/pages/QuoteEditorPage'))
 const OrdersPage = lazy(() => import('@/pages/OrdersPage'))
+const PriceListPage = lazy(() => import('@/pages/PriceListPage'))
 const OrderEditorPage = lazy(() => import('@/pages/OrderEditorPage'))
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
 
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       { path: 'hesapla', element: <CalculatorPage /> },
       { path: 'urunler', element: <ProductsPage /> },
       { path: 'urunler/:id', element: <ProductDetailPage /> },
+      { path: 'fiyat-listesi', element: <PriceListPage /> },
       { path: 'siparisler', element: <OrdersPage /> },
       { path: 'siparisler/:id', element: <OrderEditorPage /> },
       { path: 'teklifler', element: <QuotesPage /> },

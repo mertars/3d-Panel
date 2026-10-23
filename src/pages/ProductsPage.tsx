@@ -1,5 +1,6 @@
-import { LayoutGrid, List, Package, Plus, Search } from 'lucide-react'
+import { LayoutGrid, List, Package, Plus, ScrollText, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useNewProduct } from '@/app/useNewProduct'
 import { Button, EmptyState, GlassCard, Input, Segmented, Select, Skeleton, Switch } from '@/components/ui'
 import { ProductCard, ProductRow } from '@/features/products/ProductCard'
@@ -43,6 +44,7 @@ export default function ProductsPage() {
   const view = useUI((s) => s.productsView)
   const setView = useUI((s) => s.setProductsView)
   const newProduct = useNewProduct()
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState(ALL)
   const [tag, setTag] = useState(ALL)
@@ -111,6 +113,7 @@ export default function ProductsPage() {
             placeholder="Ürün, kategori veya etiket ara"
             aria-label="Ürün ara"
             type="search"
+            data-page-search
           />
         </div>
         <Select
@@ -162,6 +165,10 @@ export default function ProductsPage() {
             </button>
           )}
         </span>
+        <Button size="sm" variant="ghost" onClick={() => navigate('/fiyat-listesi')} className="ml-auto">
+          <ScrollText />
+          Fiyat listesi
+        </Button>
         <label className="flex min-h-11 items-center gap-2.5">
           <span>Arşivi göster{archivedCount ? ` (${archivedCount})` : ''}</span>
           <Switch checked={showArchived} onChange={setShowArchived} aria-label="Arşivlenen ürünleri göster" />
