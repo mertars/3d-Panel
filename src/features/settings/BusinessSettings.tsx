@@ -1,7 +1,7 @@
 import { ArrowRight, BadgePercent, Boxes, ImagePlus, Plus, Stamp, Trash2, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
-import { BlurInput, Button, Field, NumberInput, Section } from '@/components/ui'
+import { BlurInput, Button, Field, NumberInput, Section, Segmented } from '@/components/ui'
 import { useBlobUrl } from '@/hooks/useBlobUrl'
 import { formatGram } from '@/lib/format'
 import { compressImage } from '@/lib/image'
@@ -147,5 +147,35 @@ export function CatalogLinksSection() {
         </Link>
       ))}
     </div>
+  )
+}
+
+export function OrdersSettingsSection() {
+  const s = useSettings()
+  const update = useSettingsStore((st) => st.update)
+  return (
+    <Section title="Siparişler & kapasite" icon={<Boxes className="size-4" />}>
+      <div className="grid min-w-0 gap-4 @2xl:grid-cols-2">
+        <Field
+          label="Stoktan düşme zamanı"
+          htmlFor="s-consume"
+          info="Sipariş bu duruma geçince kullanılan filament stoktan düşülür ve yazıcı saat sayacına eklenir. Sipariş Yeni veya İptal’e alınırsa geri alınır."
+        >
+          <Segmented<'printing' | 'delivered'>
+            aria-label="Stoktan düşme zamanı"
+            className="w-full"
+            value={s.consumeOn}
+            onChange={(consumeOn) => void update({ consumeOn })}
+            options={[
+              { value: 'printing', label: 'Baskıda' },
+              { value: 'delivered', label: 'Teslim edildi' },
+            ]}
+          />
+        </Field>
+        <Field label="Yazıcı başına günlük kullanılabilir saat" htmlFor="s-hpd" info="Panel’deki kapasite hesabı için: yazıcı sayısı × günlük saat × 30 gün.">
+          <NumberInput id="s-hpd" value={s.printerHoursPerDay} onChange={(v) => void update({ printerHoursPerDay: Math.min(24, Math.max(1, v ?? 16)) })} unit="sa/gün" step={1} min={1} max={24} />
+        </Field>
+      </div>
+    </Section>
   )
 }

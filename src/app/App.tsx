@@ -3,7 +3,7 @@ import { lazy, useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Toaster, TooltipProvider } from '@/components/ui'
 import { useApplyTheme } from '@/hooks/useTheme'
-import { DashboardPage, OrdersPage } from '@/pages/placeholders'
+import { DashboardPage } from '@/pages/placeholders'
 import { useSettingsStore } from '@/store/settings'
 import { useUI } from '@/store/ui'
 import { LogoMark } from './Logo'
@@ -19,6 +19,8 @@ const PrintersPage = lazy(() => import('@/pages/PrintersPage'))
 const ChannelsPage = lazy(() => import('@/pages/ChannelsPage'))
 const QuotesPage = lazy(() => import('@/pages/QuotesPage'))
 const QuoteEditorPage = lazy(() => import('@/pages/QuoteEditorPage'))
+const OrdersPage = lazy(() => import('@/pages/OrdersPage'))
+const OrderEditorPage = lazy(() => import('@/pages/OrderEditorPage'))
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
 
 const router = createBrowserRouter([
@@ -30,6 +32,7 @@ const router = createBrowserRouter([
       { path: 'urunler', element: <ProductsPage /> },
       { path: 'urunler/:id', element: <ProductDetailPage /> },
       { path: 'siparisler', element: <OrdersPage /> },
+      { path: 'siparisler/:id', element: <OrderEditorPage /> },
       { path: 'teklifler', element: <QuotesPage /> },
       { path: 'teklifler/:id', element: <QuoteEditorPage /> },
       { path: 'filamentler', element: <FilamentsPage /> },

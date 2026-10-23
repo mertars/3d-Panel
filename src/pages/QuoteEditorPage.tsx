@@ -4,12 +4,13 @@ import { ArrowLeft, Check, ClipboardCopy, Download, FileText, PackagePlus, Plus,
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useLayout } from '@/app/AppShell'
-import { Badge, BlurInput, Button, EmptyState, Field, GlassCard, Input, NumberInput, Segmented, Select, Skeleton, Textarea, Tooltip } from '@/components/ui'
+import { BlurInput, Button, EmptyState, Field, GlassCard, Input, NumberInput, Segmented, Select, Skeleton, Textarea } from '@/components/ui'
 import { deleteQuote, getQuote, listProducts, restoreQuote, saveQuote, type Product, type Quote, type QuoteItem, type QuoteStatus } from '@/db'
 import { useCatalog } from '@/features/calculator/useCalculation'
 import { evaluateVariant } from '@/features/products/evaluate'
 import { customItem, quoteItemFor, quoteText, quoteTotal, STATUS_LABEL, withQuantity } from '@/features/quotes/actions'
 import { QuoteCard } from '@/features/quotes/QuoteCard'
+import { createOrderFromQuote, orderForQuote } from '@/features/orders/actions'
 import { fileSlug, formatTL } from '@/lib/format'
 import { useSettings } from '@/store/settings'
 import { toast } from '@/store/toast'
@@ -26,6 +27,7 @@ export default function QuoteEditorPage() {
   const productMap = useMemo(() => new Map(products.map((p) => [p.id, p])), [products])
   const [quote, setQuote] = useState<Quote | null | undefined>(undefined)
   const [saved, setSaved] = useState(true)
+  const linkedOrder = useLiveQuery(() => orderForQuote(id), [id])
   const cardRef = useRef<HTMLDivElement>(null)
   const pending = useRef<Quote | null>(null)
   const timer = useRef<number | undefined>(undefined)
@@ -204,15 +206,28 @@ export default function QuoteEditorPage() {
           </div>
           {q.status === 'accepted' && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Tooltip content="Siparişler Parça 3’te geliyor">
-                <span tabIndex={0}>
-                  <Button size="sm" disabled>
-                    <ShoppingBag />
-                    Siparişe dönüştür
-                  </Button>
-                </span>
-              </Tooltip>
-              <Badge size="xs">yakında</Badge>
+              {linkedOrder ? (
+                <Button size="sm" onClick={() => navigate(`/siparisler/${linkedOrder.id}`)}>
+                  <ShoppingBag />
+                  {linkedOrder.number} siparişini aç
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={async () => {
+                    window.clearTimeout(timer.current)
+                    if (pending.current) await saveQuote(pending.current)
+                    pending.current = null
+                    const o = await createOrderFromQuote(q, catalog, settings)
+                    toast(`${o.number} siparişi oluşturuldu`, { tone: 'success' })
+                    navigate(`/siparisler/${o.id}`)
+                  }}
+                >
+                  <ShoppingBag />
+                  Siparişe dönüştür
+                </Button>
+              )}
             </div>
           )}
         </div>
