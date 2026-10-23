@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { saveProduct, type AppSettings, type Product, type ProductInput } from '@/db'
+import { saveProduct, type AppSettings, type Product, type ProductInput, type SaleSource } from '@/db'
 import type { PricingSettings } from '@/lib/pricing'
 import type { Draft } from './draft'
 import type { Calculation } from './useCalculation'
@@ -26,6 +26,13 @@ function pricingSettings(s: AppSettings): PricingSettings {
 
 const n = (x: number | null) => x ?? 0
 
+/** Kaydedilecek satış fiyatı: seçilen kaynak (manuel boşsa A) */
+export function saleFromDraft(d: Draft, calc: Calculation): { saleSource: SaleSource; salePrice: number } {
+  if (d.saleSource === 'manual' && calc.manual) return { saleSource: 'manual', salePrice: calc.manual.raw }
+  if (d.saleSource === 'b') return { saleSource: 'b', salePrice: calc.prices.b.rounded }
+  return { saleSource: 'a', salePrice: calc.prices.a.rounded }
+}
+
 /** Taslağı, o anki hesap sonuçlarının snapshot'ıyla birlikte ürün olarak kaydeder */
 export async function saveDraftAsProduct(d: Draft, calc: Calculation, settings: AppSettings): Promise<Product> {
   const input: ProductInput = {
@@ -49,6 +56,7 @@ export async function saveDraftAsProduct(d: Draft, calc: Calculation, settings: 
       unitsPerPlate: Math.max(1, Math.floor(n(d.unitsPerPlate)) || 1),
     },
     manualPrice: d.manualPrice,
+    ...saleFromDraft(d, calc),
     snapshot: {
       at: Date.now(),
       settings: pricingSettings(settings),

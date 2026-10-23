@@ -1,4 +1,4 @@
-import type { AppSettings, Channel, FilamentType, PrinterPreset } from './types'
+import type { AppSettings, Channel, FilamentType, ModelLicense, PrintNotes, PrinterPreset } from './types'
 
 export const DEFAULT_SETTINGS: AppSettings = {
   id: 'app',
@@ -16,8 +16,37 @@ export const DEFAULT_SETTINGS: AppSettings = {
   compactDecimals: false,
   usdRate: 45,
   onboarded: false,
+  bulkTiers: [
+    { quantity: 1, discountPercent: 0 },
+    { quantity: 5, discountPercent: 5 },
+    { quantity: 10, discountPercent: 10 },
+    { quantity: 25, discountPercent: 15 },
+    { quantity: 50, discountPercent: 20 },
+  ],
+  lowStockGrams: 150,
+  brandName: 'Katman Atölye',
+  brandContact: '',
+  brandLogo: null,
+  quoteValidityDays: 14,
+  defaultLeadTime: '3–5 iş günü',
   updatedAt: 0,
 }
+
+export const EMPTY_PRINT_NOTES: PrintNotes = {
+  layerHeight: null,
+  infillPercent: null,
+  nozzle: '',
+  plateType: '',
+  supports: '',
+  notes: '',
+}
+
+export const LICENSE_OPTIONS: { value: ModelLicense; label: string; ok: boolean }[] = [
+  { value: 'commercial', label: 'Ticari satışa uygun', ok: true },
+  { value: 'licensed', label: 'Ticari lisans alındı', ok: true },
+  { value: 'personal', label: 'Sadece kişisel kullanım', ok: false },
+  { value: 'unknown', label: 'Bilinmiyor', ok: false },
+]
 
 export interface PrinterPresetInfo {
   key: PrinterPreset

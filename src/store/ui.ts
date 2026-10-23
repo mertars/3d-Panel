@@ -8,6 +8,8 @@ interface UIState {
   sidebarCollapsed: boolean
   paletteOpen: boolean
   wizardOpen: boolean
+  productsView: 'grid' | 'list'
+  setProductsView: (v: 'grid' | 'list') => void
   setTheme: (t: ThemePref) => void
   cycleTheme: () => void
   toggleSidebar: () => void
@@ -24,6 +26,8 @@ export const useUI = create<UIState>()(
       sidebarCollapsed: false,
       paletteOpen: false,
       wizardOpen: false,
+      productsView: 'grid',
+      setProductsView: (productsView) => set({ productsView }),
       setTheme: (theme) => set({ theme }),
       cycleTheme: () => set({ theme: ORDER[(ORDER.indexOf(get().theme) + 1) % ORDER.length] }),
       toggleSidebar: () => set({ sidebarCollapsed: !get().sidebarCollapsed }),
@@ -32,7 +36,7 @@ export const useUI = create<UIState>()(
     }),
     {
       name: 'katman-ui',
-      partialize: (s) => ({ theme: s.theme, sidebarCollapsed: s.sidebarCollapsed }),
+      partialize: (s) => ({ theme: s.theme, sidebarCollapsed: s.sidebarCollapsed, productsView: s.productsView }),
     },
   ),
 )

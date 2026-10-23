@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useLayout } from '@/app/AppShell'
 import { freshDraft, useNewProduct } from '@/app/useNewProduct'
 import { Badge, Button, GlassCard, Segmented, Sheet, Skeleton } from '@/components/ui'
-import { getProduct } from '@/db'
+import { useNavigate } from 'react-router'
+import { getProduct, type Product } from '@/db'
+import { createQuoteForProduct } from '@/features/quotes/actions'
 import { BasicsSection, FilamentSection, LaborSection, PrintSection, QuickSection } from '@/features/calculator/FormSections'
 import { MiniPriceBar } from '@/features/calculator/MiniPriceBar'
 import { PricePanel } from '@/features/calculator/PricePanel'
@@ -29,6 +31,7 @@ export default function CalculatorPage() {
   const setDraft = useCalculator((s) => s.set)
   const markSaved = useCalculator((s) => s.markSaved)
   const newProduct = useNewProduct()
+  const navigate = useNavigate()
   const [errors, setErrors] = useState<ProductErrors>({})
   const [saving, setSaving] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -49,7 +52,7 @@ export default function CalculatorPage() {
     }
   }, [catalog.loaded])
 
-  async function save() {
+  async function save(): Promise<Product | undefined> {
     const draft = useCalculator.getState().draft
     const errs = validateDraft(draft)
     setErrors(errs)
@@ -64,11 +67,21 @@ export default function CalculatorPage() {
       const p = await saveDraftAsProduct(draft, calc, settings)
       markSaved(p.id)
       toast(draft.productId ? `“${p.name}” güncellendi` : `“${p.name}” kaydedildi`, { tone: 'success' })
+      return p
     } catch {
       toast('Kaydedilemedi — tarayıcı depolaması dolu olabilir', { tone: 'danger' })
     } finally {
       setSaving(false)
     }
+  }
+
+  async function quote() {
+    const { draft, dirty: isDirty } = useCalculator.getState()
+    const product = draft.productId && !isDirty ? await getProduct(draft.productId) : await save()
+    if (!product) return
+    setSheetOpen(false)
+    const q = await createQuoteForProduct(product, settings)
+    navigate(`/teklifler/${q.id}`)
   }
 
   const twoColumn = contentWidth >= TWO_COLUMN_MIN
@@ -83,7 +96,7 @@ export default function CalculatorPage() {
   }
 
   const panel = (
-    <PricePanel calc={calc} channels={catalog.channels} onSave={save} saving={saving} />
+    <PricePanel calc={calc} channels={catalog.channels} onSave={() => void save()} onQuote={() => void quote()} saving={saving} />
   )
 
   return (

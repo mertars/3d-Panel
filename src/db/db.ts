@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import { DEFAULT_SETTINGS, defaultChannels, defaultFilamentTypes } from './defaults'
+import { normalizePrinter, normalizeProduct, normalizeSettings, normalizeSpool } from './normalize'
 import type {
   AppSettings,
   Channel,
@@ -41,6 +42,20 @@ export class KatmanDB extends Dexie {
       quotes: 'id, productId, createdAt',
       priceHistory: 'id, productId, at',
     })
+
+    // v2 (Parça 2): yeni alanlar + teklif indeksleri
+    this.version(2)
+      .stores({
+        quotes: 'id, number, status, createdAt',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('products').toCollection().modify((p: Product) => Object.assign(p, normalizeProduct(p)))
+        await tx.table('printers').toCollection().modify((p: Printer) => Object.assign(p, normalizePrinter(p)))
+        await tx.table('spools').toCollection().modify((s: Spool) => Object.assign(s, normalizeSpool(s)))
+        await tx.table('settings').toCollection().modify((s: AppSettings) => Object.assign(s, normalizeSettings(s)))
+        // Eski (Parça 1) teklif kayıtları yer tutucuydu; şemaya uymayanları temizle
+        await tx.table('quotes').filter((q: Partial<Quote>) => !Array.isArray(q.items)).delete()
+      })
 
     // İlk açılışta varsayılan verilerle tohumla
     this.on('populate', (tx) => {

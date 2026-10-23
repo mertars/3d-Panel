@@ -1,5 +1,5 @@
-import type { CalcMode, FilamentType, Printer, Product, Spool } from '@/db'
-import type { CostInput, ExtraItem } from '@/lib/pricing'
+import type { CalcMode, FilamentType, Printer, Product, ProductVariant, SaleSource, Spool } from '@/db'
+import { weightedAverageGramPrice, type CostInput, type ExtraItem } from '@/lib/pricing'
 
 /** Hesapla formunun (kaydedilmemiş) durumu. Boş alanlar null. */
 export interface DraftFilament {
@@ -33,6 +33,8 @@ export interface Draft {
   extras: DraftExtra[]
   packaging: number | null
   manualPrice: number | null
+  /** Kaydederken satış fiyatı olarak hangisi kullanılsın */
+  saleSource: SaleSource
 }
 
 export const rowKey = () => Math.random().toString(36).slice(2, 10)
@@ -56,6 +58,7 @@ export function emptyDraft(defaults: { packaging: number; filamentId?: string; p
     extras: [],
     packaging: defaults.packaging,
     manualPrice: null,
+    saleSource: 'a',
   }
 }
 
@@ -78,6 +81,7 @@ export function draftFromProduct(p: Product): Draft {
     extras: p.detailed.extras.map((e) => ({ key: rowKey(), ...e })),
     packaging: p.detailed.packaging,
     manualPrice: p.manualPrice,
+    saleSource: p.saleSource,
   }
 }
 
@@ -95,8 +99,18 @@ export interface ResolvedFilament {
   spoolGrams: number
 }
 
-/** Bir filament satırının fiyat kaynağını (makara veya tür) bulur */
+export const AVG_PREFIX = 'avg:'
+export const avgFilamentId = (typeId: string) => `${AVG_PREFIX}${typeId}`
+
+/** Bir filament satırının fiyat kaynağını (makara, tür veya stok ortalaması) bulur */
 export function resolveFilament(id: string, catalog: Catalog): ResolvedFilament | null {
+  if (id.startsWith(AVG_PREFIX)) {
+    const typeId = id.slice(AVG_PREFIX.length)
+    const type = catalog.filamentTypes.find((t) => t.id === typeId)
+    const avg = weightedAverageGramPrice(catalog.spools.filter((s) => s.filamentTypeId === typeId))
+    if (!type || avg === null) return null
+    return { id, name: `${type.name} · stok ortalaması`, color: type.color, spoolPrice: avg * 1000, spoolGrams: 1000 }
+  }
   const spool = catalog.spools.find((s) => s.id === id)
   if (spool) {
     const type = catalog.filamentTypes.find((t) => t.id === spool.filamentTypeId)
@@ -155,4 +169,16 @@ export function draftWarnings(d: Draft, catalog: Catalog): string[] {
   if (d.filaments.some((f) => f.filamentId && !resolveFilament(f.filamentId, catalog))) w.push('Silinmiş bir filament seçili')
   if (!d.printHours) w.push('Baskı süresi girilmedi')
   return w
+}
+
+/** Varyant: ürünün detaylı girdilerini varyantın filament/süre/adet/işçilik değerleriyle değiştirir */
+export function variantDraft(base: Draft, v: ProductVariant): Draft {
+  return {
+    ...base,
+    mode: 'detailed',
+    filaments: v.filaments.map((f) => ({ key: rowKey(), ...f })),
+    printHours: v.printHours,
+    unitsPerPlate: v.unitsPerPlate,
+    laborMinutes: v.laborMinutes,
+  }
 }

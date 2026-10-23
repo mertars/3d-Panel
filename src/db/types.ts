@@ -1,4 +1,4 @@
-import type { CostBreakdown, ExtraItem, PriceResult, PricingSettings } from '@/lib/pricing'
+import type { BulkTier, CostBreakdown, ExtraItem, PriceResult, PricingSettings } from '@/lib/pricing'
 import type { CurrencyStyle } from '@/lib/format'
 
 export type ID = string
@@ -12,6 +12,17 @@ export interface AppSettings extends PricingSettings {
   /** USD/TL kuru (Etsy gibi dolar bazlı ücretler için, manuel) */
   usdRate: number
   onboarded: boolean
+  /** Toplu adet indirim kademeleri */
+  bulkTiers: BulkTier[]
+  /** Düşük stok eşiği (g) */
+  lowStockGrams: number
+  /** Teklif kartındaki marka */
+  brandName: string
+  brandContact: string
+  brandLogo: Blob | null
+  /** Yeni tekliflerin geçerlilik süresi (gün) */
+  quoteValidityDays: number
+  defaultLeadTime: string
   updatedAt: number
 }
 
@@ -27,7 +38,18 @@ export interface Printer {
   watts: number
   maintenancePerHour: number
   isDefault: boolean
+  /** Katman'a girmeden önce basılmış saat (elle) */
+  startHours: number
+  maintenanceLog: MaintenanceEntry[]
   createdAt: number
+}
+
+export interface MaintenanceEntry {
+  id: ID
+  /** YYYY-MM-DD */
+  date: string
+  note: string
+  cost: number | null
 }
 
 export interface FilamentType {
@@ -47,7 +69,7 @@ export interface FilamentType {
   order: number
 }
 
-/** Parça 2: gerçek makara stoğu */
+/** Gerçek makara stoğu */
 export interface Spool {
   id: ID
   filamentTypeId: ID
@@ -57,6 +79,12 @@ export interface Spool {
   spoolPrice: number
   spoolGrams: number
   remainingGrams: number
+  /** Boş makara ağırlığı (g) — tartarak güncelleme için */
+  emptySpoolWeight: number | null
+  /** YYYY-MM-DD */
+  purchaseDate: string | null
+  supplier: string
+  note: string
   createdAt: number
 }
 
@@ -89,7 +117,7 @@ export interface Channel {
 }
 
 export interface ProductFilamentLine {
-  /** FilamentType veya Spool id'si */
+  /** FilamentType, Spool veya "avg:<türId>" (stok ortalaması) */
   filamentId: ID
   gram: number
   purgeGram: number
@@ -105,6 +133,32 @@ export interface ProductSnapshot {
 }
 
 export type CalcMode = 'quick' | 'detailed'
+
+/** Satış fiyatının kaynağı */
+export type SaleSource = 'a' | 'b' | 'manual'
+
+export type ModelLicense = 'commercial' | 'personal' | 'licensed' | 'unknown'
+
+export interface PrintNotes {
+  layerHeight: number | null
+  infillPercent: number | null
+  nozzle: string
+  plateType: string
+  supports: string
+  notes: string
+}
+
+/** Aynı ürünün boy/renk seçeneği — kendi filament/süre değerleriyle */
+export interface ProductVariant {
+  id: ID
+  name: string
+  filaments: ProductFilamentLine[]
+  printHours: number
+  unitsPerPlate: number
+  laborMinutes: number
+  /** Varyanta özel satış fiyatı (yoksa ürünün kaynağına göre A/B) */
+  priceOverride: number | null
+}
 
 export interface Product {
   id: ID
@@ -125,30 +179,63 @@ export interface Product {
     unitsPerPlate: number
   }
   manualPrice: number | null
+  /** Kayıtlı satış fiyatı ve kaynağı */
+  saleSource: SaleSource
+  salePrice: number
+  variants: ProductVariant[]
+  printNotes: PrintNotes
+  license: ModelLicense
+  competitorPrice: number | null
+  competitorNote: string
+  archived: boolean
   snapshot: ProductSnapshot
   createdAt: number
   updatedAt: number
 }
 
-/** Parça 2'de genişletilecek */
+/** Parça 3'te genişletilecek; yazıcı istatistikleri tamamlanan siparişlerden okunur */
 export interface Order {
   id: ID
   productId: ID | null
   channelId: ID | null
+  quoteId: ID | null
   customer: string
   quantity: number
   unitPrice: number
+  printerId: ID | null
+  /** Siparişin toplam baskı saati */
+  printHours: number
+  /** Siparişin toplam amortisman payı (TL) */
+  depreciation: number
   status: 'new' | 'printing' | 'ready' | 'shipped' | 'done' | 'cancelled'
   createdAt: number
 }
 
-/** Parça 2/3'te genişletilecek */
+export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected'
+
+export interface QuoteItem {
+  key: string
+  productId: ID | null
+  variantId: ID | null
+  /** Müşterinin göreceği ad */
+  name: string
+  quantity: number
+  unitPrice: number
+}
+
 export interface Quote {
   id: ID
-  productId: ID | null
+  /** T-2026-001 */
+  number: string
   customer: string
-  price: number
+  items: QuoteItem[]
+  note: string
+  /** YYYY-MM-DD */
+  validUntil: string
+  leadTime: string
+  status: QuoteStatus
   createdAt: number
+  updatedAt: number
 }
 
 export interface PriceHistoryEntry {
@@ -159,4 +246,7 @@ export interface PriceHistoryEntry {
   priceA: number
   priceB: number
   manualPrice: number | null
+  /** O anki kayıtlı satış fiyatı */
+  salePrice: number
+  reason: 'save' | 'apply' | 'sale-change'
 }

@@ -1,11 +1,11 @@
 import { FileSignature, Save, TriangleAlert } from 'lucide-react'
-import { Badge, Button, Field, NumberInput, PriceCard, StatCard, Tooltip } from '@/components/ui'
-import type { Channel } from '@/db'
+import { Badge, Button, Field, NumberInput, PriceCard, Segmented, StatCard } from '@/components/ui'
+import type { Channel, SaleSource } from '@/db'
+import { ChannelPriceTable } from '@/features/channels/ChannelPriceTable'
 import { cn } from '@/lib/cn'
 import { formatNumber, formatPercent, formatTL } from '@/lib/format'
 import type { PriceResult, ProfitMetrics } from '@/lib/pricing'
 import { useSettings } from '@/store/settings'
-import { ChannelPrices } from './ChannelPrices'
 import { CostDonut } from './CostDonut'
 import { useCalculator } from './store'
 import type { Calculation } from './useCalculation'
@@ -52,16 +52,19 @@ interface PricePanelProps {
   calc: Calculation
   channels: Channel[]
   onSave: () => void
+  /** Kaydeder (gerekirse) ve bu ürünle yeni teklif açar */
+  onQuote: () => void
   saving: boolean
   className?: string
 }
 
 /** Sağdaki yapışkan fiyat paneli (mobilde sheet içinde) */
-export function PricePanel({ calc, channels, onSave, saving, className }: PricePanelProps) {
+export function PricePanel({ calc, channels, onSave, onQuote, saving, className }: PricePanelProps) {
   const settings = useSettings()
   const manualPrice = useCalculator((s) => s.draft.manualPrice)
   const productId = useCalculator((s) => s.draft.productId)
   const dirty = useCalculator((s) => s.dirty)
+  const saleSource = useCalculator((s) => s.draft.saleSource)
   const setDraft = useCalculator((s) => s.set)
   const { cost, prices, manual } = calc
   const showRaw = settings.rounding !== 'none'
@@ -138,7 +141,35 @@ export function PricePanel({ calc, channels, onSave, saving, className }: PriceP
       </div>
 
       <div className="inset-surface rounded-[14px] p-4">
-        <ChannelPrices channels={channels} prices={prices} manual={manual} />
+        <ChannelPriceTable
+          channels={channels}
+          targets={[
+            { value: 'a', label: 'A', amount: prices.a.rounded },
+            { value: 'b', label: 'B', amount: prices.b.rounded },
+            ...(manual ? [{ value: 'manual', label: 'Manuel', amount: manual.raw }] : []),
+          ]}
+        />
+      </div>
+
+      <div className="inset-surface flex flex-wrap items-center justify-between gap-2 rounded-[14px] px-4 py-3">
+        <div className="min-w-0">
+          <div className="text-[13px] font-medium text-fg">Satış fiyatı olarak kaydet</div>
+          <div className="tnum text-xs text-fg-3">
+            {formatTL(saleSource === 'b' ? prices.b.rounded : saleSource === 'manual' && manual ? manual.raw : prices.a.rounded)}
+            {saleSource === 'manual' && !manual && ' · manuel fiyat boş, A kullanılır'}
+          </div>
+        </div>
+        <Segmented<SaleSource>
+          aria-label="Satış fiyatı kaynağı"
+          size="sm"
+          value={saleSource}
+          onChange={(v) => setDraft({ saleSource: v })}
+          options={[
+            { value: 'a', label: 'A' },
+            { value: 'b', label: 'B' },
+            { value: 'manual', label: 'Manuel' },
+          ]}
+        />
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
@@ -146,14 +177,10 @@ export function PricePanel({ calc, channels, onSave, saving, className }: PriceP
           <Save />
           {productId ? (dirty ? 'Değişiklikleri kaydet' : 'Kaydedildi') : 'Kaydet'}
         </Button>
-        <Tooltip content="Teklif kartları Parça 2’de geliyor">
-          <span className="flex flex-1" tabIndex={0}>
-            <Button size="lg" className="flex-1" disabled aria-label="Teklif oluştur (yakında)">
-              <FileSignature />
-              Teklif oluştur
-            </Button>
-          </span>
-        </Tooltip>
+        <Button size="lg" className="flex-1" onClick={onQuote} disabled={saving || !hasCost}>
+          <FileSignature />
+          Teklif oluştur
+        </Button>
       </div>
     </div>
   )

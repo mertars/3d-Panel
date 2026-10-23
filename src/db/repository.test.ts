@@ -59,11 +59,13 @@ describe('Dexie tohum verileri ve ürün kaydı', () => {
         unitsPerPlate: 1,
       },
       manualPrice: null,
+      saleSource: 'a',
+      salePrice: prices.a.rounded,
       snapshot: { at: Date.now(), settings, cost, priceA: prices.a, priceB: prices.b, manual: null },
     })
     const history = await db.priceHistory.where('productId').equals(saved.id).toArray()
     expect(history).toHaveLength(1)
-    expect(history[0]).toMatchObject({ priceA: 309, priceB: 289 })
+    expect(history[0]).toMatchObject({ priceA: 309, priceB: 289, salePrice: 309, reason: 'save' })
 
     const reloaded = draftFromProduct((await db.products.get(saved.id))!)
     const again = computePrices(computeCost(draftToCostInput(reloaded, catalog), settings), settings)
