@@ -27,16 +27,30 @@ npm run build && npx vite preview --port 4173 &
 node scripts/e2e-check.mjs   # ekran görüntüleri: scripts/out/
 ```
 
-## Cloudflare Pages
+## Cloudflare'a yayınlama
+
+### Workers (Workers & Pages → "Import a repository" akışı)
 
 | Ayar | Değer |
 |---|---|
-| Framework preset | None (veya Vite) |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+| Production branch | `main` |
+
+`wrangler.jsonc` statik varlıkları `dist/` klasöründen yayınlar ve SPA yönlendirmesini
+(`not_found_handling: single-page-application`) açar. Worker adı (`name`) panelde oluşturulan
+Worker adıyla aynı olmalı; farklıysa `wrangler.jsonc` içindeki `name` alanını değiştir.
+
+### Pages (klasik)
+
+| Ayar | Değer |
+|---|---|
 | Build komutu | `npm run build` |
 | Build çıktı klasörü | `dist` |
-| Node sürümü | 20 veya üstü (`NODE_VERSION` ortam değişkeni ile) |
 
-SPA yönlendirmesi `public/_redirects` dosyasıyla yapılır (`/* /index.html 200`); build sırasında `dist/` içine kopyalanır.
+Pages'te SPA yönlendirmesi `public/_redirects` ile yapılır (`/* /index.html 200`).
+Bu dosya Workers yüklemesinden `public/.assetsignore` ile hariç tutulur (Workers'ta aynı kural döngü hatası verir).
 
 ## Yapı
 
