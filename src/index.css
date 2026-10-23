@@ -18,7 +18,8 @@
   --highlight: rgba(255, 255, 255, 0.09);
   --text: #f5f5f7;
   --text-2: #a1a1aa;
-  --text-3: #71717a;
+  /* Spesifikasyon #71717A önerdi; koyu zeminde küçük metinde WCAG AA (4,5:1) için açıldı */
+  --text-3: #8e8e99;
   --input: rgba(255, 255, 255, 0.04);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -12px rgba(0, 0, 0, 0.5);
   --blob-opacity: 0.2;
@@ -27,6 +28,11 @@
   --overlay: rgba(4, 4, 8, 0.6);
   --price-a-tint: rgba(255, 122, 24, 0.12);
   --price-b-tint: rgba(124, 92, 255, 0.14);
+  --brand-2: #ff3d77;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #f87171;
+  --info: #38bdf8;
   /* Grafik kategorik paleti (doğrulandı: dataviz validator, koyu yüzey) */
   --series-1: #3987e5;
   --series-2: #d95926;
@@ -59,6 +65,12 @@
   --overlay: rgba(240, 240, 245, 0.6);
   --price-a-tint: rgba(255, 122, 24, 0.1);
   --price-b-tint: rgba(124, 92, 255, 0.1);
+  /* Açık temada durum renkleri koyulaştırıldı: beyaz zeminde metin kontrastı ≥ 4,5:1 */
+  --brand-2: #b0154c;
+  --success: #166534;
+  --warning: #92400e;
+  --danger: #b91c1c;
+  --info: #075985;
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
@@ -85,13 +97,13 @@
   --color-field: var(--input);
 
   --color-brand-1: #ff7a18;
-  --color-brand-2: #ff3d77;
+  --color-brand-2: var(--brand-2);
   --color-brand-3: #7c5cff;
   --color-blue: #38bdf8;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #38bdf8;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 
   --radius-card: 20px;
   --radius-ctl: 12px;
@@ -363,5 +375,27 @@ input[type='number']::-webkit-outer-spin-button {
   .quote-card {
     box-shadow: none !important;
     border: 1px solid #e5e5ea;
+  }
+}
+
+/* Bağlantıyla kaydırılan bölümler yapışkan üst çubuğun altında kalmasın */
+.glass[id] {
+  scroll-margin-top: 96px;
+}
+
+@media print {
+  .pricelist-frame {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .pricelist-scale {
+    transform: none !important;
+    width: auto !important;
+  }
+  .pricelist-sheet {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
   }
 }

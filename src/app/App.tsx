@@ -1,15 +1,15 @@
-import { MotionConfig } from 'framer-motion'
+import { LazyMotion, MotionConfig } from 'framer-motion'
 import { lazy, useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Toaster, TooltipProvider } from '@/components/ui'
 import { useApplyTheme } from '@/hooks/useTheme'
-import { DashboardPage, OrdersPage } from '@/pages/placeholders'
 import { useSettingsStore } from '@/store/settings'
 import { useUI } from '@/store/ui'
 import { LogoMark } from './Logo'
 import { AppShell } from './AppShell'
 import { Backdrop } from './Backdrop'
 
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const CalculatorPage = lazy(() => import('@/pages/CalculatorPage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const ProductsPage = lazy(() => import('@/pages/ProductsPage'))
@@ -19,7 +19,12 @@ const PrintersPage = lazy(() => import('@/pages/PrintersPage'))
 const ChannelsPage = lazy(() => import('@/pages/ChannelsPage'))
 const QuotesPage = lazy(() => import('@/pages/QuotesPage'))
 const QuoteEditorPage = lazy(() => import('@/pages/QuoteEditorPage'))
+const OrdersPage = lazy(() => import('@/pages/OrdersPage'))
+const PriceListPage = lazy(() => import('@/pages/PriceListPage'))
+const OrderEditorPage = lazy(() => import('@/pages/OrderEditorPage'))
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
+
+const loadMotionFeatures = () => import('./motionFeatures').then((m) => m.default)
 
 const router = createBrowserRouter([
   {
@@ -29,7 +34,9 @@ const router = createBrowserRouter([
       { path: 'hesapla', element: <CalculatorPage /> },
       { path: 'urunler', element: <ProductsPage /> },
       { path: 'urunler/:id', element: <ProductDetailPage /> },
+      { path: 'fiyat-listesi', element: <PriceListPage /> },
       { path: 'siparisler', element: <OrdersPage /> },
+      { path: 'siparisler/:id', element: <OrderEditorPage /> },
       { path: 'teklifler', element: <QuotesPage /> },
       { path: 'teklifler/:id', element: <QuoteEditorPage /> },
       { path: 'filamentler', element: <FilamentsPage /> },
@@ -66,6 +73,7 @@ export function App() {
   }, [settings, setWizardOpen])
 
   return (
+    <LazyMotion features={loadMotionFeatures} strict>
     <MotionConfig reducedMotion="user">
       <TooltipProvider delayDuration={300}>
         <Backdrop />
@@ -80,5 +88,6 @@ export function App() {
         <Toaster />
       </TooltipProvider>
     </MotionConfig>
+    </LazyMotion>
   )
 }

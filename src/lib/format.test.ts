@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fileSlug, formatHours, formatTL, parseDuration, parseGram, parseLocaleNumber } from './format'
+import { fileSlug, formatHours, formatNumber, formatTL, parseDuration, parseGram, parseLocaleNumber } from './format'
 
 describe('parseDuration', () => {
   it.each([
@@ -66,6 +66,12 @@ describe('format', () => {
   it('TL formatı 1.234,56 ₺', () => {
     expect(formatTL(1234.56).replace(/\s/g, ' ')).toBe('1.234,56 ₺')
     expect(formatTL(309).replace(/\s/g, ' ')).toBe('309,00 ₺')
+  })
+  it('sayı hane sayısı', () => {
+    expect(formatNumber(446.0234, 0)).toBe('446')
+    expect(formatNumber(1234.567, 1)).toBe('1.234,6')
+    expect(formatNumber(1234.567)).toBe('1.234,57')
+    expect(formatNumber(0.12345, 3)).toBe('0,123')
   })
   it('saat formatı', () => {
     expect(formatHours(4.5)).toBe('4 sa 30 dk')

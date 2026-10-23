@@ -23,6 +23,12 @@ export interface AppSettings extends PricingSettings {
   /** Yeni tekliflerin geçerlilik süresi (gün) */
   quoteValidityDays: number
   defaultLeadTime: string
+  /** Stok ve yazıcı saati hangi durumda düşülsün */
+  consumeOn: 'printing' | 'delivered'
+  /** Yazıcı başına günlük kullanılabilir saat (kapasite) */
+  printerHoursPerDay: number
+  /** Son JSON yedeği (ms) */
+  lastBackupAt: number | null
   updatedAt: number
 }
 
@@ -193,22 +199,75 @@ export interface Product {
   updatedAt: number
 }
 
-/** Parça 3'te genişletilecek; yazıcı istatistikleri tamamlanan siparişlerden okunur */
-export interface Order {
-  id: ID
+export type OrderStatus = 'new' | 'printing' | 'ready' | 'shipped' | 'delivered' | 'cancelled'
+
+/** Sipariş kalemi — üretim bilgisi eklendiği andaki ürün hesabından kopyalanır (sonradan değişmez) */
+export interface OrderItem {
+  key: string
   productId: ID | null
-  channelId: ID | null
-  quoteId: ID | null
-  customer: string
+  variantId: ID | null
+  name: string
   quantity: number
   unitPrice: number
+  /** Adet başı maliyet (snapshot) */
+  unitCost: number
+  /** Adet başı baskı saati */
+  hoursPerUnit: number
+  /** Adet başı amortisman payı (TL) */
+  depreciationPerUnit: number
   printerId: ID | null
-  /** Siparişin toplam baskı saati */
-  printHours: number
-  /** Siparişin toplam amortisman payı (TL) */
-  depreciation: number
-  status: 'new' | 'printing' | 'ready' | 'shipped' | 'done' | 'cancelled'
+  /** Adet başı filament ihtiyacı (gram + purge, plaka başı adede bölünmüş) */
+  filaments: { filamentId: ID; grams: number }[]
+}
+
+/** Stoktan düşülen miktarlar — geri almak için saklanır */
+export interface Consumption {
+  at: number
+  spools: { spoolId: ID; grams: number }[]
+  /** Hiçbir makaradan karşılanamayan gram (stok yetmedi) */
+  missing: { filamentId: ID; grams: number }[]
+  printers: { printerId: ID; hours: number; depreciation: number }[]
+}
+
+export interface Order {
+  id: ID
+  /** S-2026-001 */
+  number: string
+  customer: string
+  contact: string
+  channelId: ID | null
+  items: OrderItem[]
+  /** İndirim (TL) */
+  discount: number
+  shippingPayer: 'customer' | 'seller'
+  /** Satıcı ödüyorsa kargo tutarı */
+  shippingCost: number
+  paid: boolean
+  /** YYYY-MM-DD */
+  dueDate: string | null
+  note: string
+  status: OrderStatus
+  quoteId: ID | null
+  /** Stoktan düşülmüşse kayıt (geri alınabilir) */
+  consumption: Consumption | null
   createdAt: number
+  updatedAt: number
+}
+
+export type FailureReason = 'adhesion' | 'layer-shift' | 'spaghetti' | 'filament' | 'power' | 'other'
+
+/** Başarısız baskı (fire) kaydı */
+export interface Failure {
+  id: ID
+  at: number
+  printerId: ID | null
+  filamentId: ID
+  grams: number
+  hours: number
+  reason: FailureReason
+  note: string
+  orderId: ID | null
+  consumption: Consumption | null
 }
 
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected'

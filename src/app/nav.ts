@@ -31,7 +31,11 @@ export const NAV: NavItem[] = [
   { to: '/ayarlar', label: 'Ayarlar', icon: Settings },
 ]
 
+/** Menüde olmayan sayfaların başlıkları */
+const EXTRA_TITLES: Record<string, string> = { '/fiyat-listesi': 'Fiyat listesi' }
+
 export function navTitle(pathname: string): string {
+  if (EXTRA_TITLES[pathname]) return EXTRA_TITLES[pathname]
   const match = NAV.filter((n) => n.to !== '/' && pathname.startsWith(n.to))[0]
   return match?.label ?? (pathname === '/' ? 'Panel' : 'Katman')
 }

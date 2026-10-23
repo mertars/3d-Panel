@@ -12,14 +12,16 @@ Tüm veriler tarayıcıda (IndexedDB) saklanır; sunucu yoktur. Tam şartname: [
 - **Parça 1:** altyapı, tasarım sistemi, hesaplama motoru + testler, Dexie şeması, ilk açılış sihirbazı, Ayarlar ve Hesapla.
 - **Parça 2:** Ürünler (ızgara/liste, filtre, detay, varyant, lisans, rakip, toplu adet, fiyat geçmişi, eskimiş fiyat uyarısı),
   Filamentler (türler + makara stoğu), Yazıcılar (kullanım, amortisman halkası, bakım kaydı), Kanallar, Teklif oluşturucu (PNG / metin / yazdır).
-- **Parça 3 (yakında):** Panel (kâr panosu) ve Siparişler. Yazıcıların basılan saati ve amortisman ilerlemesi siparişlerden okunur; siparişler gelene kadar 0 görünür.
+- **Parça 3:** Siparişler (Kanban sürükle-bırak, mobil durum sekmeleri, filament yeter mi, stoktan düşme/geri alma, fire kaydı + gerçek fire oranı),
+  Panel (KPI + değişim, aylık grafik, kanal dağılımı, en iyi ürünler, filament tüketimi, kapasite, başa baş), fiyat listesi (A4 + Instagram hikâyesi),
+  JSON yedek / geri yükleme, Excel uyumlu CSV, örnek veri, PWA (çevrimdışı, ana ekrana eklenebilir), klavye kısayolları (`N`, `/`, `⌘K`).
 
 ## Geliştirme
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # Vitest — hesaplama motoru ve ayrıştırıcı testleri
+npm test           # Vitest — hesaplama motoru, sipariş/stok, yedek, analiz testleri
 npm run build      # tsc -b && vite build → dist/
 ```
 
@@ -29,6 +31,8 @@ Uçtan uca duman testi + yatay taşma kontrolü (Playwright, yüklü Chromium il
 npm run build && npx vite preview --port 4173 &
 node scripts/e2e-check.mjs   # ekran görüntüleri: scripts/out/
 ```
+
+PWA ikonları `public/icons/icon.svg`'den üretilir: `node scripts/make-icons.mjs`.
 
 ## Cloudflare'a yayınlama
 

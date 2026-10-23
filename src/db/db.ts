@@ -4,6 +4,7 @@ import { normalizePrinter, normalizeProduct, normalizeSettings, normalizeSpool }
 import type {
   AppSettings,
   Channel,
+  Failure,
   FilamentType,
   Order,
   PriceHistoryEntry,
@@ -28,6 +29,7 @@ export class KatmanDB extends Dexie {
   orders!: EntityTable<Order, 'id'>
   quotes!: EntityTable<Quote, 'id'>
   priceHistory!: EntityTable<PriceHistoryEntry, 'id'>
+  failures!: EntityTable<Failure, 'id'>
 
   constructor(name = 'katman') {
     super(name)
@@ -55,6 +57,18 @@ export class KatmanDB extends Dexie {
         await tx.table('settings').toCollection().modify((s: AppSettings) => Object.assign(s, normalizeSettings(s)))
         // Eski (Parça 1) teklif kayıtları yer tutucuydu; şemaya uymayanları temizle
         await tx.table('quotes').filter((q: Partial<Quote>) => !Array.isArray(q.items)).delete()
+      })
+
+    // v3 (Parça 3): siparişler gerçek şemaya geçti + fire kayıtları
+    this.version(3)
+      .stores({
+        orders: 'id, number, status, channelId, createdAt',
+        failures: 'id, at, printerId, orderId',
+      })
+      .upgrade(async (tx) => {
+        // Parça 1–2'deki sipariş tablosu yer tutucuydu; şemaya uymayan kayıtları temizle
+        await tx.table('orders').filter((o: Partial<Order>) => !Array.isArray(o.items)).delete()
+        await tx.table('settings').toCollection().modify((s: AppSettings) => Object.assign(s, normalizeSettings(s)))
       })
 
     // İlk açılışta varsayılan verilerle tohumla

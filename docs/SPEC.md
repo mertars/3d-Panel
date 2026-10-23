@@ -236,5 +236,33 @@ Hedef his: Linear / Vercel / Raycast kalitesinde, sade ama premium. Kalabalık d
 7. **Komut paleti (⌘K):** ürün ara, sayfaya git, "yeni ürün", "yeni teklif", tema değiştir.
 8. Testleri genişlet (varyant, toplu fiyat, kanal tablosu, eskimiş fiyat tespiti), build al, 360/390/768/1280/1440 px'te kontrol et, dürüst rapor ver.
 
-> Parça 3 metni bu repoya henüz eklenmedi; o parçaya geçildiğinde buraya eklenmeli.
+---
+
+## PARÇA 3 — Siparişler, kâr panosu, yedekleme, PWA, cila
+
+`docs/SPEC.md`'yi oku; Parça 1–2'nin üzerine ekle.
+
+1. **Siparişler**
+   - Alanlar: müşteri adı, iletişim (opsiyonel), kanal, ürünler (ürün + varyant + adet + birim fiyat — ürünün satış fiyatı gelir, değiştirilebilir), indirim, kargo (kim ödüyor), ödeme alındı mı, teslim tarihi, not
+   - Durumlar: Yeni → Baskıda → Hazır → Kargoda → Teslim edildi (+ İptal)
+   - Masaüstünde Kanban (sürükle-bırak), mobilde durum sekmeli liste
+   - Sipariş özeti: ciro, kanal kesintisi, toplam maliyet, net kâr, toplam baskı saati, gereken filament
+   - "Filament yeter mi?" kontrolü: siparişin ihtiyacı ile stok karşılaştırılır, yetmeyen renk kırmızı
+   - Sipariş "Baskıda"ya geçince (veya "Teslim edildi"de — ayarlardan seçilsin) kullanılan filament stoktan düşülür ve yazıcı saat sayacına eklenir; geri alınabilir olsun
+   - Fire kaydı: başarısız baskıyı kaydet (gram + süre + sebep: tabla tutmadı, katman kayması, spagetti, filament, elektrik kesintisi, diğer) → stoktan düşer, gerçek fire oranı hesaplanır ve Ayarlar'daki varsayılan fire oranı ile karşılaştırılır ("Gerçek fire oranın %8, ayarın %5 — güncellemek ister misin?")
+2. **Panel (ana sayfa)**
+   - Üstte 4 StatCard: bu ayın cirosu, net kâr, ortalama marj, toplam baskı saati (geçen aya göre değişim rozetiyle)
+   - Grafikler: aylık ciro/kâr çizgi grafiği, kanal dağılımı halka grafiği, en çok satan 5 ürün, saat başı kârı en yüksek 5 ürün, filament tüketimi (renk/tür bazında)
+   - Bekleyen siparişler mini listesi, düşük stok makaralar, fiyatı eskimiş ürün sayısı
+   - Kapasite: yazıcı başına aylık kullanılabilir saat (ayardan, ör. günde 16 saat) vs. bekleyen siparişlerin toplam baskı saati → doluluk çubuğu
+   - Tarih aralığı seçici (bu ay, geçen ay, son 90 gün, bu yıl, özel)
+   - Başa baş analizi kartı: "Yazıcı yatırımını çıkarmak için ortalama X satış daha gerekiyor"
+3. **Fiyat listesi çıktısı:** seçili ürünlerden müşteriye gösterilebilir fiyat listesi (fotoğraf + ad + fiyat), PNG ve yazdırılabilir; Instagram hikâyesi oranında (1080×1920) seçeneği.
+4. **Yedekleme:** tüm veriyi JSON olarak dışa aktar / içe aktar (içe aktarmadan önce özet göster: "42 ürün, 18 sipariş…", birleştir veya üzerine yaz seçeneği). Ürünler ve siparişler için CSV dışa aktarma (Excel'de Türkçe karakterler bozulmasın: UTF-8 BOM, `;` ayırıcı). Ayarlarda "Son yedek: 12 gün önce" bilgisi (sadece ekranda).
+5. **Demo veri:** Ayarlar'da "Örnek verilerle doldur" (12 ürün, 20 sipariş, 6 makara) ve "Tüm veriyi sil" (çift onaylı).
+6. **PWA:** vite-plugin-pwa, uygulama ikonu (filament gradyanlı "K" katman ikonu), çevrimdışı çalışma, ana ekrana eklenebilir. Bildirim izni İSTEME.
+7. **Cila:** tüm sayfalarda boş durumlar, iskelet yüklemeler, klavye kısayolları (`N` yeni ürün, `/` arama, `⌘K` palet), tutarlı animasyonlar, açık temada kontrast kontrolü.
+8. **Son kontrol:** tüm testler, build, Lighthouse (performans ve erişilebilirlik), 360/390/430/768/1024/1280/1440 px'te her sayfada yatay taşma kontrolü, iOS Safari'de input zoom ve alt çubuk kontrolü (yapabildiğin kadarıyla). Neyi gerçekten test ettiğini dürüstçe raporla.
+
+> Uygulama notları: soluk metin rengi koyu temada `#8E8E99`'a açıldı (spesifikasyondaki `#71717A` küçük metinde WCAG AA'yı karşılamıyordu); açık temada durum renkleri aynı sebeple koyulaştırıldı.
 

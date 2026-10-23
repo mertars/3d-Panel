@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { createContext, Suspense, useContext, useLayoutEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { Skeleton } from '@/components/ui'
@@ -9,6 +9,7 @@ import { BottomTabs } from './BottomTabs'
 import { CommandPalette } from './CommandPalette'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { useShortcuts } from './useShortcuts'
 
 interface LayoutInfo {
   /** İçerik alanının genişliği (px) — sayfalar düzen kararını buna göre verir */
@@ -34,6 +35,7 @@ export function AppShell() {
   const collapsed = useUI((s) => s.sidebarCollapsed)
   const { pathname } = useLocation()
   const keyboardOpen = useKeyboardOpen()
+  useShortcuts()
   const reduce = useReducedMotion()
   const mainRef = useRef<HTMLDivElement>(null)
   const [layout, setLayout] = useState<Omit<LayoutInfo, 'keyboardOpen'>>({ contentWidth: 1200, bottomBar: false })
@@ -71,7 +73,7 @@ export function AppShell() {
           )}
         >
           <div ref={mainRef} className="min-w-0">
-            <motion.div
+            <m.div
               key={pathname}
               initial={reduce ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -81,7 +83,7 @@ export function AppShell() {
               <Suspense fallback={<PageFallback />}>
                 <Outlet />
               </Suspense>
-            </motion.div>
+            </m.div>
           </div>
         </main>
       </div>

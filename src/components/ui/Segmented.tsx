@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { useId, type ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
@@ -46,7 +46,7 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
             )}
           >
             {active && (
-              <motion.span
+              <m.span
                 layoutId={layoutId}
                 className="absolute inset-0 rounded-[9px] border border-line-strong bg-surface-strong shadow-sm"
                 transition={{ type: 'spring', stiffness: 500, damping: 38 }}

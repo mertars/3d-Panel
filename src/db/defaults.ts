@@ -1,4 +1,4 @@
-import type { AppSettings, Channel, FilamentType, ModelLicense, PrintNotes, PrinterPreset } from './types'
+import type { AppSettings, Channel, FailureReason, FilamentType, ModelLicense, OrderStatus, PrintNotes, PrinterPreset } from './types'
 
 export const DEFAULT_SETTINGS: AppSettings = {
   id: 'app',
@@ -29,6 +29,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   brandLogo: null,
   quoteValidityDays: 14,
   defaultLeadTime: '3–5 iş günü',
+  consumeOn: 'printing',
+  printerHoursPerDay: 16,
+  lastBackupAt: null,
   updatedAt: 0,
 }
 
@@ -193,4 +196,22 @@ export const DEFAULT_CATEGORIES = [
   'Ofis',
   'Yedek parça',
   'Hediye',
+]
+
+export const ORDER_STATUSES: { value: OrderStatus; label: string }[] = [
+  { value: 'new', label: 'Yeni' },
+  { value: 'printing', label: 'Baskıda' },
+  { value: 'ready', label: 'Hazır' },
+  { value: 'shipped', label: 'Kargoda' },
+  { value: 'delivered', label: 'Teslim edildi' },
+  { value: 'cancelled', label: 'İptal' },
+]
+
+export const FAILURE_REASONS: { value: FailureReason; label: string }[] = [
+  { value: 'adhesion', label: 'Tabla tutmadı' },
+  { value: 'layer-shift', label: 'Katman kayması' },
+  { value: 'spaghetti', label: 'Spagetti' },
+  { value: 'filament', label: 'Filament sorunu' },
+  { value: 'power', label: 'Elektrik kesintisi' },
+  { value: 'other', label: 'Diğer' },
 ]

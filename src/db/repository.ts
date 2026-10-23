@@ -325,9 +325,6 @@ export async function restoreProduct(d: DeletedProduct) {
 
 export const listPriceHistory = (productId: string) => db.priceHistory.where('productId').equals(productId).sortBy('at')
 
-/* ───────────── Siparişler (Parça 3) ───────────── */
-
-export const listOrders = () => db.orders.toArray()
 
 /* ───────────── Teklifler ───────────── */
 

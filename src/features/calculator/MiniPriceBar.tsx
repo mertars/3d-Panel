@@ -29,7 +29,6 @@ export function MiniPriceBar({ prices, onOpen, aboveTabs, hidden, sidebarWidth }
         type="button"
         onClick={onOpen}
         aria-haspopup="dialog"
-        aria-label={`Fiyat panelini aç. Fiyat A ${fmt(prices.a.rounded)}, Fiyat B ${fmt(prices.b.rounded)}`}
         className="solid-surface flex h-14 w-full min-w-0 items-center gap-2 rounded-2xl px-2"
       >
         <span className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-[var(--price-a-tint)] px-3 py-2">
@@ -47,7 +46,8 @@ export function MiniPriceBar({ prices, onOpen, aboveTabs, hidden, sidebarWidth }
           </span>
         </span>
         <span className="flex size-10 shrink-0 items-center justify-center text-fg-2">
-          <ChevronUp className="size-5" />
+          <span className="sr-only">Fiyat panelini aç</span>
+          <ChevronUp className="size-5" aria-hidden />
         </span>
       </button>
     </div>,

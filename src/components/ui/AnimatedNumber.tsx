@@ -1,4 +1,4 @@
-import { animate, useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 interface AnimatedNumberProps {
@@ -9,31 +9,37 @@ interface AnimatedNumberProps {
   className?: string
 }
 
+const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
+
 /** Değer değişince yumuşakça sayarak geçer (count-up). Azaltılmış harekette anında değişir. */
 export function AnimatedNumber({ value, format, duration = 300, className }: AnimatedNumberProps) {
   const reduce = useReducedMotion()
   const [display, setDisplay] = useState(value)
-  const from = useRef(value)
+  const current = useRef(value)
 
   useEffect(() => {
-    if (reduce || from.current === value) {
-      from.current = value
+    const from = current.current
+    if (reduce || from === value) {
+      current.current = value
       setDisplay(value)
       return
     }
-    const controls = animate(from.current, value, {
-      duration: duration / 1000,
-      ease: [0.2, 0.8, 0.2, 1],
-      onUpdate: (v) => {
-        from.current = v
-        setDisplay(v)
-      },
-    })
-    return () => controls.stop()
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration)
+      const v = from + (value - from) * easeOut(t)
+      current.current = v
+      setDisplay(v)
+      if (t < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
   }, [value, reduce, duration])
 
   return (
-    <span className={className} aria-label={format(value)}>
+    <span className={className}>
+      <span className="sr-only">{format(value)}</span>
       <span aria-hidden>{format(display)}</span>
     </span>
   )

@@ -5,12 +5,14 @@ import { Badge, Button, Dialog, EmptyState, Field, GlassCard, Input, Menu, Numbe
 import {
   addMaintenance,
   deletePrinter,
+  listFailures,
   listOrders,
   listPrinters,
   presetInfo,
   removeMaintenance,
   restorePrinter,
   savePrinter,
+  type Failure,
   type Order,
   type Printer,
 } from '@/db'
@@ -80,9 +82,9 @@ function MaintenanceDialog({ printer, onOpenChange }: { printer: Printer | null;
   )
 }
 
-function PrinterCard({ p, orders, onEdit, onMaintain }: { p: Printer; orders: Order[]; onEdit: () => void; onMaintain: () => void }) {
+function PrinterCard({ p, orders, failures, onEdit, onMaintain }: { p: Printer; orders: Order[]; failures: Failure[]; onEdit: () => void; onMaintain: () => void }) {
   const settings = useSettings()
-  const u = printerUsage(p, orders)
+  const u = printerUsage(p, orders, failures)
   const hourlyCost = u.hourlyDepreciation + p.maintenancePerHour + (p.watts / 1000) * settings.kwhPrice
   const maintenanceTotal = p.maintenanceLog.reduce((s, e) => s + (e.cost ?? 0), 0)
 
@@ -154,7 +156,8 @@ function PrinterCard({ p, orders, onEdit, onMaintain }: { p: Printer; orders: Or
         </div>
         <ProgressBar value={u.lifeUsed} label="Ömür kullanımı" />
         <p className="mt-1.5 text-[11px] text-fg-3">
-          Siparişlerden {formatNumber(u.orderHours, 1)} sa{p.startHours ? ` + önceki kullanım ${formatNumber(p.startHours)} sa` : ''}
+          Siparişlerden {formatNumber(u.orderHours, 1)} sa{u.failureHours ? ` + fire ${formatNumber(u.failureHours, 1)} sa` : ''}
+          {p.startHours ? ` + önceki kullanım ${formatNumber(p.startHours)} sa` : ''}
         </p>
       </div>
 
@@ -202,6 +205,7 @@ function PrinterCard({ p, orders, onEdit, onMaintain }: { p: Printer; orders: Or
 export default function PrintersPage() {
   const printers = useLiveQuery(listPrinters, [])
   const orders = useLiveQuery(listOrders, [], [])
+  const failures = useLiveQuery(listFailures, [], [])
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Printer | null>(null)
   const [maintaining, setMaintaining] = useState<Printer | null>(null)
@@ -217,7 +221,7 @@ export default function PrintersPage() {
     <div className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="max-w-2xl text-sm text-fg-2">
-          Basılan saat ve amortisman ilerlemesi tamamlanan siparişlerden otomatik hesaplanır (siparişler Parça 3’te geliyor).
+          Basılan saat ve amortisman payı, stoğu düşülen siparişlerden (Ayarlar’a göre Baskıda veya Teslim edildi) ve fire kayıtlarından otomatik hesaplanır.
         </p>
         <Button variant="primary" onClick={add}>
           <Plus />
@@ -245,6 +249,7 @@ export default function PrintersPage() {
               key={p.id}
               p={p}
               orders={orders}
+              failures={failures}
               onEdit={() => {
                 setEditing(p)
                 setOpen(true)

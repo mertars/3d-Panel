@@ -1,12 +1,12 @@
 // Uçtan uca duman testi + yatay taşma kontrolü.
 // Kullanım: npm run build && npx vite preview --port 4173 & node scripts/e2e-check.mjs
-import { chromium } from 'playwright'
+import { chromium, devices } from 'playwright'
 import { mkdirSync } from 'node:fs'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:4173'
 const OUT = 'scripts/out'
 const WIDTHS = [360, 390, 430, 768, 1024, 1280, 1440]
-const ROUTES = ['/', '/hesapla', '/urunler', '/siparisler', '/teklifler', '/filamentler', '/yazicilar', '/kanallar', '/ayarlar']
+const ROUTES = ['/', '/hesapla', '/urunler', '/siparisler', '/teklifler', '/filamentler', '/yazicilar', '/kanallar', '/ayarlar', '/fiyat-listesi']
 mkdirSync(OUT, { recursive: true })
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
@@ -207,10 +207,113 @@ const check = (cond, msg) => {
   await page.goto(BASE + '/teklifler')
   check(await page.getByText('Ayşe Yılmaz').first().waitFor({ timeout: 8000 }).then(() => true, () => false), 'Teklif listesinde görünüyor')
 
+  /* ── Parça 3 ── */
+  const ok = (p) => p.then(() => true, () => false)
+
+  // Kabul edilen teklif → sipariş
+  await page.goto(quoteUrl)
+  await page.getByRole('radio', { name: 'Kabul' }).click()
+  await page.getByRole('button', { name: 'Siparişe dönüştür' }).click()
+  await page.waitForURL('**/siparisler/*')
+  const orderUrl = page.url()
+  await page.getByText('Sipariş özeti').waitFor()
+  await page.waitForTimeout(400)
+  t = await mainText()
+  check((await page.locator('#o-customer').inputValue()) === 'Ayşe Yılmaz' && t.includes('3.231,00 ₺'), 'Tekliften sipariş: müşteri ve ciro (3.231,00 ₺) aktarıldı')
+  check(t.includes('yetmiyor'), 'Filament yeter mi: 850 g gerekli, 800 g stok → kırmızı “yetmiyor”')
+  await page.screenshot({ path: `${OUT}/siparis-1440.png`, fullPage: true })
+
+  // Kanban: sürükle-bırak → Baskıda (stok düşer)
+  await page.goto(BASE + '/siparisler')
+  await page.getByRole('region', { name: /Sipariş panosu/ }).waitFor()
+  const orderCard = page.locator('section[aria-label="Yeni"] article').first()
+  await orderCard.dragTo(page.locator('section[aria-label="Baskıda"]'), { targetPosition: { x: 100, y: 60 } })
+  check(await ok(page.getByText(/→ Baskıda · filament stoktan düşüldü/).first().waitFor({ timeout: 5000 })), 'Sürükle-bırak: Baskıda + “filament stoktan düşüldü”')
+  check(await ok(page.getByText(/stokta 50 g eksik/).first().waitFor({ timeout: 3000 })), 'Eksik stok bildirildi (50 g)')
+  await page.screenshot({ path: `${OUT}/siparisler-kanban-1440.png`, fullPage: true })
+  await page.goto(BASE + '/filamentler')
+  await page.getByText('Mat Kiremit').waitFor()
+  check((await mainText()).includes('0 g kaldı'), 'Makara stoğu düştü (800 g → 0 g)')
+  await page.goto(BASE + '/yazicilar')
+  await page.getByText('ödedi').first().waitFor()
+  t = await mainText()
+  check(!t.includes('Toplam basılan 0 sa'), 'Yazıcı saat sayacı arttı')
+  // Menüden Yeni'ye geri al → stok iade
+  await page.goto(BASE + '/siparisler')
+  await page.locator('section[aria-label="Baskıda"] article').first().getByRole('button', { name: /durumunu değiştir/ }).click()
+  await page.getByRole('menuitem', { name: '→ Yeni' }).click()
+  check(await ok(page.getByText(/→ Yeni · filament stoğa iade edildi/).first().waitFor({ timeout: 5000 })), 'Yeni’ye dönünce stok iade edildi')
+  await page.goto(BASE + '/filamentler')
+  await page.getByText('Mat Kiremit').waitFor()
+  check((await mainText()).includes('800 g kaldı'), 'Makara geri 800 g')
+
+  // Fire kaydı + gerçek fire oranı uyarısı
+  await page.goto(BASE + '/siparisler')
+  await page.getByRole('button', { name: 'Fire kaydet' }).click()
+  await page.locator('#fl-grams').fill('40')
+  await page.locator('#fl-hours').fill('1:30')
+  await page.getByRole('dialog').getByRole('button', { name: 'Kaydet' }).click()
+  check(await ok(page.getByText(/Fire kaydedildi · 40 g stoktan düşüldü/).waitFor({ timeout: 5000 })), 'Fire kaydı stoktan düştü')
+  check(await ok(page.getByText(/Gerçek fire oranın/).waitFor({ timeout: 5000 })), 'Gerçek fire oranı uyarısı göründü')
+
+  // Panel
+  await page.goto(BASE + '/')
+  check(await ok(page.getByText('Aylık ciro ve net kâr').waitFor({ timeout: 8000 })), 'Panel: grafikler ve kartlar')
+  t = await mainText()
+  check(t.includes('Kapasite') && t.includes('Başa baş') && t.includes('Bekleyen siparişler'), 'Panel: kapasite, başa baş, bekleyen siparişler')
+  for (const r of ['Geçen ay', 'Son 90 gün', 'Bu yıl', 'Özel', 'Bu ay']) await page.getByRole('radio', { name: r }).click()
+  check(true, 'Panel: tarih aralıkları değişti (hata yok)')
+  await page.screenshot({ path: `${OUT}/panel-1440.png`, fullPage: true })
+
+  // Fiyat listesi (hikâye PNG 1080×1920)
+  await page.goto(BASE + '/fiyat-listesi')
+  await page.locator('.pricelist-sheet').waitFor()
+  check((await page.locator('.pricelist-sheet').innerText()).includes('Referans ürün'), 'Fiyat listesi: ürün listelendi')
+  await page.getByRole('radio', { name: /Hikâye/ }).click()
+  const [plDl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'PNG indir' }).click()])
+  await plDl.saveAs(`${OUT}/fiyat-hikaye.png`)
+  const { readFileSync } = await import('node:fs')
+  const plBuf = readFileSync(`${OUT}/fiyat-hikaye.png`)
+  check(plBuf.readUInt32BE(16) === 1080 && plBuf.readUInt32BE(20) === 1920, 'Hikâye PNG 1080×1920')
+
+  // Kısayollar: / sayfa araması, N yeni ürün
+  await page.goto(BASE + '/urunler')
+  await page.getByRole('link', { name: /detayı$/ }).first().waitFor()
+  await page.locator('body').click({ position: { x: 5, y: 300 } })
+  await page.keyboard.press('/')
+  check(await page.evaluate(() => document.activeElement?.hasAttribute('data-page-search') ?? false), '“/” sayfa aramasına odaklandı')
+  await page.keyboard.press('Escape')
+  await page.evaluate(() => (document.activeElement instanceof HTMLElement ? document.activeElement.blur() : undefined))
+  await page.keyboard.press('n')
+  check(await ok(page.waitForURL('**/hesapla', { timeout: 5000 })), '“N” yeni ürün (Hesapla) açtı')
+
+  // Yedek: JSON dışa aktar → içe aktar (birleştir), CSV
+  await page.goto(BASE + '/ayarlar#veri')
+  await page.getByRole('button', { name: 'Yedek indir (JSON)' }).waitFor()
+  const [jsonDl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Yedek indir (JSON)' }).click()])
+  const jsonPath = `${OUT}/yedek.json`
+  await jsonDl.saveAs(jsonPath)
+  const backup = JSON.parse(readFileSync(jsonPath, 'utf8'))
+  check(backup.app === 'katman' && backup.data.products.length >= 1 && backup.data.orders.length >= 1, `JSON yedek: ${backup.data.products.length} ürün, ${backup.data.orders.length} sipariş, ${backup.data.spools.length} makara`)
+  check(await ok(page.getByText(/Son yedek: (az önce|şimdi|\d+ dakika önce)/).waitFor({ timeout: 5000 })), '“Son yedek” bilgisi güncellendi')
+  const [csvDl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Ürünler CSV' }).click()])
+  await csvDl.saveAs(`${OUT}/urunler.csv`)
+  const csv = readFileSync(`${OUT}/urunler.csv`, 'utf8')
+  check(csv.charCodeAt(0) === 0xfeff && csv.includes('Ad;Kategori;') && csv.includes('Referans ürün;'), 'Ürünler CSV: UTF-8 BOM + “;” ayırıcı + Türkçe karakter')
+  const [csv2] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Siparişler CSV' }).click()])
+  await csv2.saveAs(`${OUT}/siparisler.csv`)
+  check(readFileSync(`${OUT}/siparisler.csv`, 'utf8').includes('Ayşe Yılmaz'), 'Siparişler CSV')
+  await page.locator('input[type=file][accept*="json"]').setInputFiles(jsonPath)
+  const impDlg = page.getByRole('dialog', { name: 'Yedekten geri yükle' })
+  await impDlg.waitFor()
+  check((await impDlg.innerText()).includes('ürün'), 'İçe aktarmadan önce özet gösterildi')
+  await impDlg.getByRole('button', { name: 'Birleştir' }).last().click()
+  check(await ok(page.getByText('Yedek mevcut veriyle birleştirildi').waitFor({ timeout: 5000 })), 'Yedek birleştirildi')
+
   // Veri dolu sayfalarda taşma (aynı bağlam, farklı genişlikler)
-  for (const width of [360, 390, 768, 1280, 1440]) {
+  for (const width of WIDTHS) {
     await page.setViewportSize({ width, height: 860 })
-    for (const route of ['/urunler', productUrl.replace(BASE, ''), '/filamentler', '/yazicilar', '/kanallar', '/teklifler', quoteUrl.replace(BASE, ''), '/ayarlar']) {
+    for (const route of ['/', '/hesapla', '/urunler', productUrl.replace(BASE, ''), '/siparisler', orderUrl.replace(BASE, ''), '/filamentler', '/yazicilar', '/kanallar', '/teklifler', quoteUrl.replace(BASE, ''), '/fiyat-listesi', '/ayarlar']) {
       await page.goto(BASE + route)
       await page.waitForTimeout(450)
       const sw = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth))
@@ -225,8 +328,26 @@ const check = (cond, msg) => {
   await page.screenshot({ path: `${OUT}/hesapla-1440-light.png` })
   await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'))
 
+  // Açık temada da taşma ve görüntü
+  await page.goto(BASE + '/')
+  await page.evaluate(() => (document.documentElement.dataset.theme = 'light'))
+  await page.waitForTimeout(400)
+  await page.screenshot({ path: `${OUT}/panel-1440-light.png`, fullPage: true })
+  await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'))
+
   check(errors.length === 0, `Konsol hatası yok${errors.length ? ': ' + errors.join(' | ') : ''}`)
-  await ctx.storageState({ path: `${OUT}/state.json` })
+
+  // Tüm veriyi sil — çift onay
+  await page.goto(BASE + '/ayarlar#veri')
+  await page.getByRole('button', { name: 'Tüm veriyi sil' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Devam' }).click()
+  const wipe = page.getByRole('dialog', { name: 'Son onay' })
+  await wipe.waitFor()
+  check(await wipe.getByRole('button', { name: /Kalıcı olarak sil/ }).isDisabled(), 'Silme: “SİL” yazılmadan buton kapalı')
+  await page.locator('#wipe-confirm').fill('sil')
+  await wipe.getByRole('button', { name: /Kalıcı olarak sil/ }).click()
+  await page.waitForURL(BASE + '/')
+  check(await ok(page.getByRole('dialog', { name: /hoş geldin/i }).waitFor({ timeout: 8000 })), 'Tüm veri silindi → ilk açılış sihirbazı geri geldi')
   await ctx.close()
 }
 
@@ -296,6 +417,60 @@ for (const width of WIDTHS) {
     )
     check(small.length === 0, `360px dokunma hedefleri ≥ 44px ${small.length ? JSON.stringify(small) : ''}`)
   }
+  await ctx.close()
+}
+
+/* ── 3) PWA: service worker + çevrimdışı açılış ── */
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } })
+  const page = await ctx.newPage()
+  await page.goto(BASE + '/')
+  const swOk = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return false
+    await navigator.serviceWorker.ready
+    return true
+  })
+  check(swOk, 'Service worker kuruldu')
+  const manifest = await page.evaluate(async () => {
+    const href = document.querySelector('link[rel=manifest]')?.getAttribute('href')
+    return href ? (await fetch(href)).json() : null
+  })
+  check(!!manifest && manifest.name.startsWith('Katman') && manifest.icons.some((i) => i.purpose === 'maskable') && manifest.display === 'standalone', 'Web manifest: ad, ikonlar (maskable dahil), standalone')
+  await page.reload()
+  await page.waitForTimeout(1500)
+  await ctx.setOffline(true)
+  await page.goto(BASE + '/hesapla').catch(() => {})
+  check(await page.getByRole('heading', { name: 'Hesapla' }).first().isVisible().catch(() => false), 'Çevrimdışı: uygulama açıldı (/hesapla)')
+  const notif = await page.evaluate(() => (typeof Notification === 'undefined' ? 'yok' : Notification.permission))
+  check(notif !== 'granted', `Bildirim izni istenmedi (durum: ${notif})`)
+  await ctx.close()
+}
+
+/* ── 4) iPhone emülasyonu (Chromium — gerçek Safari değil) ── */
+{
+  const ctx = await browser.newContext({ ...devices['iPhone 13'] })
+  const page = await ctx.newPage()
+  await page.goto(BASE + '/')
+  await page.getByRole('button', { name: 'Atla' }).click()
+  await page.goto(BASE + '/hesapla')
+  await page.locator('#p-name').waitFor()
+  const small = await page.evaluate(() =>
+    [...document.querySelectorAll('input, select, textarea')]
+      .filter((el) => el.getBoundingClientRect().width > 1)
+      .map((el) => parseFloat(getComputedStyle(el).fontSize))
+      .filter((fs) => fs < 16),
+  )
+  check(small.length === 0, `iPhone: tüm form alanları ≥16px (zoom yok) ${small.length ? JSON.stringify(small) : ''}`)
+  const nav = await page.evaluate(() => {
+    const n = document.querySelector('nav[aria-label="Ana menü"].fixed') ?? [...document.querySelectorAll('nav')].find((x) => getComputedStyle(x).position === 'fixed')
+    if (!n) return null
+    const r = n.getBoundingClientRect()
+    return { pos: getComputedStyle(n).position, bottomGap: Math.round(window.innerHeight - r.bottom), pb: getComputedStyle(n).paddingBottom }
+  })
+  check(!!nav && nav.pos === 'fixed' && nav.bottomGap === 0, `iPhone: alt sekme çubuğu sabit ve en altta ${JSON.stringify(nav)}`)
+  const vh = await page.evaluate(() => [...document.styleSheets].flatMap((ss) => { try { return [...ss.cssRules].map((r) => r.cssText) } catch { return [] } }).some((t) => /\b100vh\b/.test(t)))
+  check(!vh, 'CSS’te 100vh kullanılmıyor (100dvh)')
+  await page.screenshot({ path: `${OUT}/iphone-hesapla.png` })
   await ctx.close()
 }
 

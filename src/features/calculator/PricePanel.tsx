@@ -1,12 +1,15 @@
 import { FileSignature, Save, TriangleAlert } from 'lucide-react'
-import { Badge, Button, Field, NumberInput, PriceCard, Segmented, StatCard } from '@/components/ui'
+import { lazy, Suspense } from 'react'
+import { Badge, Button, Field, NumberInput, PriceCard, Segmented, Skeleton, StatCard } from '@/components/ui'
+
+// Halka grafik (recharts) ayrı parça: fiyat kartları beklemeden görünür
+const CostDonut = lazy(() => import('./CostDonut').then((m) => ({ default: m.CostDonut })))
 import type { Channel, SaleSource } from '@/db'
 import { ChannelPriceTable } from '@/features/channels/ChannelPriceTable'
 import { cn } from '@/lib/cn'
 import { formatNumber, formatPercent, formatTL } from '@/lib/format'
 import type { PriceResult, ProfitMetrics } from '@/lib/pricing'
 import { useSettings } from '@/store/settings'
-import { CostDonut } from './CostDonut'
 import { useCalculator } from './store'
 import type { Calculation } from './useCalculation'
 
@@ -137,7 +140,9 @@ export function PricePanel({ calc, channels, onSave, onQuote, saving, className 
           <h3 className="text-sm font-semibold">Maliyet dağılımı</h3>
           {cost.unitsPerPlate > 1 && <Badge size="xs">{cost.unitsPerPlate} adet/plaka</Badge>}
         </div>
-        <CostDonut slices={calc.slices} total={cost.totalCost} />
+        <Suspense fallback={<Skeleton className="h-[132px] w-full" />}>
+          <CostDonut slices={calc.slices} total={cost.totalCost} />
+        </Suspense>
       </div>
 
       <div className="inset-surface rounded-[14px] p-4">

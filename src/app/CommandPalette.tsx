@@ -1,9 +1,9 @@
 import * as RDialog from '@radix-ui/react-dialog'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CornerDownLeft, FileSignature, Package, PanelLeft, Plus, Search, Sparkles, SunMoon, type LucideIcon } from 'lucide-react'
+import { CornerDownLeft, FileSignature, ScrollText, Package, PanelLeft, Plus, Search, Sparkles, SunMoon, type LucideIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { listProductNames } from '@/db'
+import { createOrder, listProductNames } from '@/db'
 import { cn } from '@/lib/cn'
 import { useUI } from '@/store/ui'
 import { NAV } from './nav'
@@ -50,6 +50,8 @@ export function CommandPalette() {
     const actions: Command[] = [
       { id: 'new', label: 'Yeni ürün', group: 'Eylemler', icon: Plus, keywords: 'ekle hesapla', run: newProduct },
       { id: 'quote', label: 'Yeni teklif', group: 'Eylemler', icon: FileSignature, keywords: 'müşteri fiyat', run: () => void newQuote() },
+      { id: 'pricelist', label: 'Fiyat listesi oluştur', group: 'Eylemler', icon: ScrollText, keywords: 'instagram hikaye png', run: () => navigate('/fiyat-listesi') },
+      { id: 'order', label: 'Yeni sipariş', group: 'Eylemler', icon: Plus, keywords: 'müşteri', run: () => void createOrder().then((o) => navigate(`/siparisler/${o.id}`)) },
       { id: 'theme', label: 'Temayı değiştir', group: 'Eylemler', icon: SunMoon, keywords: 'koyu açık', run: cycleTheme },
       { id: 'sidebar', label: 'Kenar çubuğunu daralt / genişlet', group: 'Eylemler', icon: PanelLeft, run: toggleSidebar },
       { id: 'wizard', label: 'Kurulum sihirbazını aç', group: 'Eylemler', icon: Sparkles, keywords: 'ilk açılış', run: () => setWizardOpen(true) },
@@ -160,6 +162,20 @@ export function CommandPalette() {
                   })}
               </div>
             ))}
+          </div>
+          <div className="hidden items-center gap-4 border-t border-line px-4 py-2.5 text-[11px] text-fg-3 sm:flex">
+            <span>
+              <kbd className="rounded border border-line px-1">N</kbd> yeni ürün
+            </span>
+            <span>
+              <kbd className="rounded border border-line px-1">/</kbd> sayfada ara
+            </span>
+            <span>
+              <kbd className="rounded border border-line px-1">⌘K</kbd> / <kbd className="rounded border border-line px-1">Ctrl K</kbd> palet
+            </span>
+            <span className="ml-auto">
+              <kbd className="rounded border border-line px-1">↑↓</kbd> gez · <kbd className="rounded border border-line px-1">↵</kbd> aç
+            </span>
           </div>
         </RDialog.Content>
       </RDialog.Portal>

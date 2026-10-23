@@ -1,6 +1,6 @@
 import * as RDialog from '@radix-ui/react-dialog'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Printer as PrinterIcon, Sparkles, X, Zap } from 'lucide-react'
 import { useState } from 'react'
 import { LogoMark } from '@/app/Logo'
@@ -94,7 +94,7 @@ export default function OnboardingWizard() {
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7">
             <AnimatePresence mode="wait" initial={false}>
-              <motion.div
+              <m.div
                 key={step}
                 initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -208,7 +208,7 @@ export default function OnboardingWizard() {
                     />
                   </div>
                 )}
-              </motion.div>
+              </m.div>
             </AnimatePresence>
           </div>
 
