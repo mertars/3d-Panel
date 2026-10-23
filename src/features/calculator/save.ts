@@ -19,7 +19,7 @@ export function validateDraft(d: Draft): ProductErrors {
   return Object.fromEntries(res.error.issues.map((i) => [String(i.path[0]), i.message])) as ProductErrors
 }
 
-function pricingSettings(s: AppSettings): PricingSettings {
+export function pricingSettings(s: AppSettings): PricingSettings {
   const { kwhPrice, laborRate, wastePercent, costMultiplier, hourlyProfit, includeCostInB, rounding, vatEnabled, vatPercent } = s
   return { kwhPrice, laborRate, wastePercent, costMultiplier, hourlyProfit, includeCostInB, rounding, vatEnabled, vatPercent }
 }

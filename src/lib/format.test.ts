@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatHours, formatTL, parseDuration, parseGram, parseLocaleNumber } from './format'
+import { fileSlug, formatHours, formatTL, parseDuration, parseGram, parseLocaleNumber } from './format'
 
 describe('parseDuration', () => {
   it.each([
@@ -70,5 +70,13 @@ describe('format', () => {
   it('saat formatı', () => {
     expect(formatHours(4.5)).toBe('4 sa 30 dk')
     expect(formatHours(0.25)).toBe('15 dk')
+  })
+})
+
+describe('fileSlug', () => {
+  it('Türkçe karakterleri sadeleştirir', () => {
+    expect(fileSlug('T-2026-001-Ayşe Yılmaz')).toBe('T-2026-001-Ayse-Yilmaz')
+    expect(fileSlug('ÇĞİÖŞÜ çğıöşü / ? *')).toBe('CGIOSU-cgiosu')
+    expect(fileSlug('***')).toBe('')
   })
 })

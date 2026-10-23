@@ -125,7 +125,7 @@ Ayrıca test et: purge'lu çok renkli ürün, unitsPerPlate=8, fire %0, hızlı 
 
 - **Elektrik:** 4,00 TL/kWh (açıklama: "Faturandaki birim fiyatı gir. Mesken düşük kademe ~2,6–2,9 TL, yüksek kademe ~3,9–4,3 TL, ticarethane ~4,8 TL civarı. 2026'da birkaç kez zam geldi.")
 - **Fire oranı:** %5 (açıklama: "İyi ayarlı Bambu yazıcıda %3–5, yeni başlayanda %15–30")
-- **Yazıcı presetleri** (watt değerleri tahmini ortalama, kullanıcı priz wattmetresiyle düzeltebilir): Bambu Lab A1 mini (80 W), A1 (100 W), P1S (120 W), X1C (130 W), H2D (200 W), Diğer. Ömür varsayılanı 5.000 saat. Fiyat alanı boş gelsin, kullanıcı kendi aldığı fiyatı girsin.
+- **Yazıcı presetleri** (watt değerleri tahmini ortalama, kullanıcı priz wattmetresiyle düzeltebilir): Bambu Lab A1 mini (80 W), A1 (100 W), P1S (120 W), X1C (130 W), H2D (200 W), Diğer. _(Kullanıcı isteğiyle eklendi: A2 ~110 W, A2L ~150 W — resmi ortalama değer yayınlanmadığı için tahmini.)_ Ömür varsayılanı 5.000 saat. Fiyat alanı boş gelsin, kullanıcı kendi aldığı fiyatı girsin.
 - **Filament türleri** (TL/kg tahmini, yoğunluk g/cm³): PLA 600 (1,24) · PLA Matte 650 (1,24) · PLA Silk 700 (1,24) · PETG 650 (1,27) · ABS 650 (1,04) · ASA 900 (1,07) · TPU 1.000 (1,21) · PLA-CF 1.100 (1,30) · PLA Wood 900 (1,15). Makara gramı varsayılan 1000.
 - **Satış kanalları** (her biri düzenlenebilir, yeni kanal eklenebilir; her kartta "son doğrulama tarihi" alanı ve "Oranları satıcı panelinden doğrula" notu):
 
@@ -205,4 +205,36 @@ Hedef his: Linear / Vercel / Raycast kalitesinde, sade ama premium. Kalabalık d
    - "Kaydet" → ürün olarak kaydeder (Parça 2'de listelenecek). Kaydederken o anki hesap sonuçları da snapshot olarak saklansın.
 8. Bitince: testleri ve `npm run build`'i çalıştır, 360 ve 1440 px'te taşma kontrolü yap, Cloudflare Pages ayarlarını (build komutu, çıktı klasörü) README'ye yaz, sonuçları dürüstçe raporla.
 
-> Parça 2 ve Parça 3 metinleri bu repoya henüz eklenmedi; ilgili parçaya geçildiğinde bu dosyaya eklenmeli.
+---
+
+## PARÇA 2 — Ürün kataloğu, filament stoğu, yazıcılar, kanallar, teklif
+
+`docs/SPEC.md`'yi oku; Parça 1'in üzerine ekle, mevcut tasarım sistemini kullan.
+
+1. **Ürünler sayfası**
+   - Izgara (fotoğraflı kart) ve liste görünümü arasında geçiş
+   - Kartta: fotoğraf, ad, kategori, filament renk swatch'ları, baskı süresi, Fiyat A / Fiyat B / satış fiyatı, marj rozeti (renkli: <%20 kırmızı, %20–40 sarı, >%40 yeşil), saat başı kâr
+   - Arama, kategori/etiket filtresi, sıralama (ad, fiyat, marj, saat başı kâr, son güncelleme)
+   - Ürün detay: hesap dökümü, "Satış fiyatı" (A, B veya manuel seçilip kaydedilir), varyantlar (aynı ürünün boy/renk seçenekleri — her varyant kendi gram/süresiyle), baskı notları (katman yüksekliği, dolgu %, nozzle, plaka tipi, destek), model lisansı alanı (Ticari satışa uygun / Sadece kişisel / Ticari lisans alındı / Bilinmiyor — "uygun değil" veya "bilinmiyor" ise kartta uyarı rozeti; MakerWorld'den basılan modellerin satışa uygunluğu için önemli)
+   - Çoğalt, düzenle, sil (geri al'lı), arşivle
+   - Rakip fiyatı alanı (ör. Trendyol'daki benzer ürün): fiyatımızın rakibe göre konumunu küçük bir çubukla göster
+   - Toplu adet fiyatı: 1 / 5 / 10 / 25 / 50 adet için kademeli indirim tablosu (indirim oranları ayarlardan; maliyetin altına düşerse kırmızı uyarı)
+2. **Fiyatı eskimiş ürünler:** Filament, elektrik veya oran ayarı değişince tüm ürünler yeniden hesaplanır. Kayıtlı satış fiyatı ile yeni hesaplanan fiyat arasında fark > %5 ise Ürünler sayfasının üstünde şerit: "7 ürünün fiyatı güncel maliyetin gerisinde" → listede eski/yeni karşılaştırması, tek tek veya toplu "yeni fiyatı uygula". Her fiyat değişikliği `priceHistory`'ye yazılır; ürün detayında küçük çizgi grafik.
+3. **Filamentler sayfası**
+   - Sekme 1 — Türler: Bölüm 4'teki kütüphane, düzenlenebilir
+   - Sekme 2 — Makaralar (stok): marka, tür, renk adı + HEX, makara fiyatı, makara gramı, kalan gram, alış tarihi, tedarikçi, not. Kalan miktar ilerleme çubuğu + makara ikonu renginde
+   - Düşük stok rozeti (eşik ayarlanabilir, ör. 150 g) — bildirim değil, sadece ekranda
+   - "Makara tartarak güncelle": boş makara ağırlığı kayıtlıysa, tartılan toplam ağırlıktan kalan gram hesaplansın
+   - Ortalama gram fiyatı (aynı türden birden fazla makara varsa ağırlıklı ortalama) — hesaplamada seçilebilir
+4. **Yazıcılar sayfası:** birden fazla yazıcı; her biri için fiyat, hurda, ömür, watt, bakım, toplam basılan saat (siparişlerden otomatik), amortisman ilerlemesi ("yazıcı kendini %38 ödedi" halka grafiği — tamamlanan siparişlerdeki amortisman payı toplamı / yazıcı fiyatı), bakım kaydı (nozzle değişimi vb. tarih + not).
+5. **Kanallar sayfası:** Bölüm 4'teki kanallar, düzenleme, yeni kanal ekleme, Shopier kademe seçimi, Etsy için USD kuru alanı (manuel). Hesapla sayfasındaki ve ürün detayındaki kanal fiyat tablosu: her kanal için liste fiyatı, kanal kesintisi, elimize geçen. Hedef olarak A / B / satış fiyatı seçilebilsin.
+6. **Teklif (müşteriye fiyat) oluşturucu**
+   - Özel sipariş için: müşteri adı, ürün(ler) + adet, ek not, geçerlilik tarihi, teslim süresi tahmini
+   - Şık bir teklif kartı önizlemesi (marka adı/logo ayarlardan; sadece müşteriye gösterilecek bilgiler — maliyet, kâr ASLA görünmez)
+   - "Görsel olarak indir" (PNG — html-to-image), "WhatsApp/Instagram metnini kopyala" (düz metin), "Yazdır/PDF" (print stylesheet)
+   - Teklif durumu: Taslak → Gönderildi → Kabul → Reddedildi; kabul edilen teklif tek tıkla siparişe dönüşür (Parça 3)
+7. **Komut paleti (⌘K):** ürün ara, sayfaya git, "yeni ürün", "yeni teklif", tema değiştir.
+8. Testleri genişlet (varyant, toplu fiyat, kanal tablosu, eskimiş fiyat tespiti), build al, 360/390/768/1280/1440 px'te kontrol et, dürüst rapor ver.
+
+> Parça 3 metni bu repoya henüz eklenmedi; o parçaya geçildiğinde buraya eklenmeli.
+

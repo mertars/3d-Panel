@@ -1,13 +1,14 @@
 import * as RDialog from '@radix-ui/react-dialog'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CornerDownLeft, Package, PanelLeft, Plus, Search, Sparkles, SunMoon, type LucideIcon } from 'lucide-react'
+import { CornerDownLeft, FileSignature, Package, PanelLeft, Plus, Search, Sparkles, SunMoon, type LucideIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { listProductNames } from '@/db'
 import { cn } from '@/lib/cn'
 import { useUI } from '@/store/ui'
 import { NAV } from './nav'
-import { useNewProduct, useOpenProduct } from './useNewProduct'
+import { useNewQuote } from '@/features/quotes/useNewQuote'
+import { useNewProduct } from './useNewProduct'
 
 interface Command {
   id: string
@@ -29,7 +30,7 @@ export function CommandPalette() {
   const setWizardOpen = useUI((s) => s.setWizardOpen)
   const navigate = useNavigate()
   const newProduct = useNewProduct()
-  const openProduct = useOpenProduct()
+  const newQuote = useNewQuote()
   const products = useLiveQuery(listProductNames, [], [])
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
@@ -48,6 +49,7 @@ export function CommandPalette() {
   const commands = useMemo<Command[]>(() => {
     const actions: Command[] = [
       { id: 'new', label: 'Yeni ürün', group: 'Eylemler', icon: Plus, keywords: 'ekle hesapla', run: newProduct },
+      { id: 'quote', label: 'Yeni teklif', group: 'Eylemler', icon: FileSignature, keywords: 'müşteri fiyat', run: () => void newQuote() },
       { id: 'theme', label: 'Temayı değiştir', group: 'Eylemler', icon: SunMoon, keywords: 'koyu açık', run: cycleTheme },
       { id: 'sidebar', label: 'Kenar çubuğunu daralt / genişlet', group: 'Eylemler', icon: PanelLeft, run: toggleSidebar },
       { id: 'wizard', label: 'Kurulum sihirbazını aç', group: 'Eylemler', icon: Sparkles, keywords: 'ilk açılış', run: () => setWizardOpen(true) },
@@ -65,10 +67,10 @@ export function CommandPalette() {
       group: 'Ürünler',
       icon: Package,
       keywords: p.category,
-      run: () => void openProduct(p.id),
+      run: () => navigate(`/urunler/${p.id}`),
     }))
     return [...actions, ...pages, ...prods]
-  }, [products, navigate, newProduct, openProduct, cycleTheme, toggleSidebar, setWizardOpen])
+  }, [products, navigate, newProduct, newQuote, cycleTheme, toggleSidebar, setWizardOpen])
 
   const filtered = useMemo(() => {
     const q = norm(query.trim())

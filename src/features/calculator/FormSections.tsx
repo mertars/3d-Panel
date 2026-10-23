@@ -3,7 +3,6 @@ import { Clock, Hand, Info, Layers, Link2, Plus, Printer as PrinterIcon, Trash2,
 import { useMemo, useState } from 'react'
 import {
   Button,
-  ColorSwatch,
   DurationInput,
   Field,
   Input,
@@ -15,9 +14,10 @@ import {
 import { DEFAULT_CATEGORIES, listCategories, type Printer } from '@/db'
 import { PrinterDialog } from '@/features/printers/PrinterDialog'
 import { formatGram, formatHours, formatTL, parseGram } from '@/lib/format'
-import { gramPrice, printerHourlyDepreciation, weightedAverageGramPrice } from '@/lib/pricing'
+import { gramPrice, printerHourlyDepreciation } from '@/lib/pricing'
 import { useSettings } from '@/store/settings'
-import { avgFilamentId, resolveFilament, type Catalog } from './draft'
+import { resolveFilament, type Catalog } from './draft'
+import { filamentOptions } from './filamentOptions'
 import { PhotoInput } from './PhotoInput'
 import type { ProductErrors } from './save'
 import { useCalculator } from './store'
@@ -106,41 +106,7 @@ export function FilamentSection({ catalog }: { catalog: Catalog }) {
   const updateFilament = useCalculator((s) => s.updateFilament)
   const removeFilament = useCalculator((s) => s.removeFilament)
 
-  const options = useMemo<SelectOption[]>(() => {
-    const spools = catalog.spools.map((sp) => {
-      const r = resolveFilament(sp.id, catalog)!
-      return {
-        value: sp.id,
-        label: r.name,
-        group: 'Makaralarım',
-        icon: <ColorSwatch color={sp.color} size={20} />,
-        description: `${formatTL(gramPrice(sp.spoolPrice, sp.spoolGrams) * 1000, { compactDecimals: true })}/kg · ${formatGram(sp.remainingGrams)} kaldı`,
-      }
-    })
-    const types = catalog.filamentTypes.map((t) => ({
-      value: t.id,
-      label: t.name,
-      group: spools.length ? 'Filament türleri' : undefined,
-      icon: <ColorSwatch color={t.color} size={20} />,
-      description: `${formatTL(gramPrice(t.spoolPrice, t.spoolGrams) * 1000, { compactDecimals: true })}/kg${t.estimated ? ' · tahmini' : ''}`,
-    }))
-    // Aynı türden birden fazla makara varsa ağırlıklı ortalama gram fiyatı seçilebilir
-    const averages = catalog.filamentTypes.flatMap((t) => {
-      const own = catalog.spools.filter((sp) => sp.filamentTypeId === t.id)
-      const avg = weightedAverageGramPrice(own)
-      if (own.length < 2 || avg === null) return []
-      return [
-        {
-          value: avgFilamentId(t.id),
-          label: `${t.name} · stok ortalaması`,
-          group: 'Stok ortalaması',
-          icon: <ColorSwatch color={t.color} size={20} />,
-          description: `${own.length} makara · ${formatTL(avg * 1000, { compactDecimals: true })}/kg (ağırlıklı)`,
-        },
-      ]
-    })
-    return [...spools, ...averages, ...types]
-  }, [catalog])
+  const options = useMemo(() => filamentOptions(catalog), [catalog])
 
   let totalGram = 0
   let totalCost = 0

@@ -9,7 +9,10 @@ Tüm veriler tarayıcıda (IndexedDB) saklanır; sunucu yoktur. Tam şartname: [
 
 ## Durum
 
-**Parça 1 tamam:** altyapı, tasarım sistemi, hesaplama motoru + testler, Dexie şeması ve tohum verileri, ilk açılış sihirbazı, Ayarlar ve Hesapla ekranları. Panel, Ürünler, Siparişler, Teklifler, Filamentler, Yazıcılar ve Kanallar sayfaları şimdilik "yakında" boş durumu gösterir (Parça 2–3).
+- **Parça 1:** altyapı, tasarım sistemi, hesaplama motoru + testler, Dexie şeması, ilk açılış sihirbazı, Ayarlar ve Hesapla.
+- **Parça 2:** Ürünler (ızgara/liste, filtre, detay, varyant, lisans, rakip, toplu adet, fiyat geçmişi, eskimiş fiyat uyarısı),
+  Filamentler (türler + makara stoğu), Yazıcılar (kullanım, amortisman halkası, bakım kaydı), Kanallar, Teklif oluşturucu (PNG / metin / yazdır).
+- **Parça 3 (yakında):** Panel (kâr panosu) ve Siparişler. Yazıcıların basılan saati ve amortisman ilerlemesi siparişlerden okunur; siparişler gelene kadar 0 görünür.
 
 ## Geliştirme
 

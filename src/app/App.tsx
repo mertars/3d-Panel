@@ -3,15 +3,7 @@ import { lazy, useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Toaster, TooltipProvider } from '@/components/ui'
 import { useApplyTheme } from '@/hooks/useTheme'
-import {
-  ChannelsPage,
-  DashboardPage,
-  FilamentsPage,
-  OrdersPage,
-  PrintersPage,
-  ProductsPage,
-  QuotesPage,
-} from '@/pages/placeholders'
+import { DashboardPage, OrdersPage } from '@/pages/placeholders'
 import { useSettingsStore } from '@/store/settings'
 import { useUI } from '@/store/ui'
 import { LogoMark } from './Logo'
@@ -20,6 +12,13 @@ import { Backdrop } from './Backdrop'
 
 const CalculatorPage = lazy(() => import('@/pages/CalculatorPage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
+const ProductsPage = lazy(() => import('@/pages/ProductsPage'))
+const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'))
+const FilamentsPage = lazy(() => import('@/pages/FilamentsPage'))
+const PrintersPage = lazy(() => import('@/pages/PrintersPage'))
+const ChannelsPage = lazy(() => import('@/pages/ChannelsPage'))
+const QuotesPage = lazy(() => import('@/pages/QuotesPage'))
+const QuoteEditorPage = lazy(() => import('@/pages/QuoteEditorPage'))
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
 
 const router = createBrowserRouter([
@@ -29,8 +28,10 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardPage /> },
       { path: 'hesapla', element: <CalculatorPage /> },
       { path: 'urunler', element: <ProductsPage /> },
+      { path: 'urunler/:id', element: <ProductDetailPage /> },
       { path: 'siparisler', element: <OrdersPage /> },
       { path: 'teklifler', element: <QuotesPage /> },
+      { path: 'teklifler/:id', element: <QuoteEditorPage /> },
       { path: 'filamentler', element: <FilamentsPage /> },
       { path: 'yazicilar', element: <PrintersPage /> },
       { path: 'kanallar', element: <ChannelsPage /> },
