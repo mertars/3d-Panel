@@ -30,6 +30,7 @@ Uygulama dili: Türkçe. Para birimi: TL (1.234,56 ₺ formatı, `Intl.NumberFor
 - vite-plugin-pwa (Parça 3'te)
 - Vitest (hesaplama motoru testleri)
 - Deploy: Cloudflare Pages (build: `npm run build`, çıktı: `dist`). SPA yönlendirmesi için `public/_redirects` → `/* /index.html 200`
+  - _Uygulama notu: yayın Cloudflare Workers üzerinden yapılıyor; SPA yönlendirmesi `wrangler.jsonc` (`not_found_handling`) ile, `_redirects` kullanılmıyor (Workers bu kuralı reddediyor)._
 
 ### 2. Klasör yapısı
 
