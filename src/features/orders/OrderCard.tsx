@@ -1,5 +1,5 @@
 import { ArrowRightLeft, CalendarClock, CircleCheck, CircleDashed } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Badge, Menu } from '@/components/ui'
 import { ORDER_STATUSES, type Channel, type Order } from '@/db'
 import { cn } from '@/lib/cn'
@@ -33,6 +33,7 @@ interface OrderCardProps {
 
 /** Kanban kartı / mobil liste satırı */
 export function OrderCard({ order, totals, channels, draggable, showStatus }: OrderCardProps) {
+  const navigate = useNavigate()
   const channel = channels.find((c) => c.id === order.channelId)
   const summary = order.items.map((i) => `${i.quantity}× ${i.name || 'kalem'}`).join(', ')
   return (
@@ -42,9 +43,16 @@ export function OrderCard({ order, totals, channels, draggable, showStatus }: Or
         e.dataTransfer.setData('text/order-id', order.id)
         e.dataTransfer.effectAllowed = 'move'
       }}
+      // Sürüklenebilir kartta tıklama kartın kendisinden; bağlantı katmanı fareyi engellemez (aksi halde sürükleme başlamaz)
+      onClick={draggable ? () => navigate(`/siparisler/${order.id}`) : undefined}
       className={cn('glass glass-hover relative flex min-w-0 flex-col gap-2 rounded-[16px] p-3.5', draggable && 'cursor-grab active:cursor-grabbing')}
     >
-      <Link to={`/siparisler/${order.id}`} className="absolute inset-0 z-[1] rounded-[16px]" aria-label={`${order.number} siparişini aç`} draggable={false} />
+      <Link
+        to={`/siparisler/${order.id}`}
+        className={cn('absolute inset-0 z-[1] rounded-[16px]', draggable && 'pointer-events-none')}
+        aria-label={`${order.number} siparişini aç`}
+        draggable={false}
+      />
       <div className="flex min-w-0 items-center gap-2">
         <span className="tnum text-[11px] text-fg-3">{order.number}</span>
         {showStatus && (
@@ -53,7 +61,7 @@ export function OrderCard({ order, totals, channels, draggable, showStatus }: Or
           </Badge>
         )}
         <span className="flex-1" />
-        <div className="relative z-[2] -my-2 -mr-2">
+        <div className="relative z-[2] -my-2 -mr-2" onClick={(e) => e.stopPropagation()}>
           <Menu
             label={`${order.number} durumunu değiştir`}
             items={ORDER_STATUSES.map((s) => ({
